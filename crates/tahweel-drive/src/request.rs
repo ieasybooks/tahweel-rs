@@ -16,7 +16,8 @@ pub(crate) const DEFAULT_RETRY_MAX_DELAY: Duration = Duration::from_secs(60);
 pub(crate) fn client(timeout: Duration) -> Result<Client, DriveError> {
     Client::builder()
         .connect_timeout(Duration::from_secs(20).min(timeout))
-        .read_timeout(Duration::from_secs(60).min(timeout))
+        // Only a total deadline: reqwest's read timeout runs from the start of the request
+        // until the response arrives, so it would cut off uploads on slow connections.
         .timeout(timeout)
         .redirect(reqwest::redirect::Policy::none())
         .user_agent(concat!("tahweel/", env!("CARGO_PKG_VERSION")))
