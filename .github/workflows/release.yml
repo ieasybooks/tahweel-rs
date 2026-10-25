@@ -1,0 +1,153 @@
+name: Release binaries
+
+# Manual runs keep artifacts only, unless publishing is enabled on a release tag.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Attach archives to this tag's GitHub release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  notices:
+    name: Generate Rust dependency notices
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5.2.3
+        with:
+          install_args: rust cargo-binstall cargo:cargo-about
+      - run: cargo about generate --locked --all-features --workspace --fail about.hbs --output-file THIRD-PARTY-LICENSES
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rust-notices
+          path: THIRD-PARTY-LICENSES
+          if-no-files-found: error
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: notices
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Ubuntu 22.04 keeps the Rust binary's glibc requirement at 2.35 or older.
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04-arm
+          - target: aarch64-apple-darwin
+            os: macos-15
+          - target: x86_64-apple-darwin
+            os: macos-15-intel
+          - target: x86_64-pc-windows-msvc
+            os: windows-2025
+    env:
+      TARGET: ${{ matrix.target }}
+      VERSION: ${{ github.ref_type == 'tag' && github.ref_name || 'dev' }}
+      EXE_SUFFIX: ${{ matrix.os == 'windows-2025' && '.exe' || '' }}
+      RUSTFLAGS: ${{ matrix.os == 'windows-2025' && '-C target-feature=+crt-static' || '' }}
+      AWS_LC_SYS_PREBUILT_NASM: 1
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install && rustup target add "$TARGET"
+      - name: Check the release tag matches the crate version
+        if: github.event_name == 'release' || inputs.publish
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(cargo metadata --no-deps --locked --format-version 1 \
+            | jq -r '.packages[] | select(.name == "tahweel-cli") | .version')
+          if [ "$GITHUB_REF_TYPE" != tag ] || [ "$TAG" != "v$version" ]; then
+            echo "::error::Publishing requires the tag v$version"
+            exit 1
+          fi
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: rust-notices
+          path: target/release-notices
+      # The same pinned, checksum-verified PDFium the tests use (.github/scripts/pdfium.py).
+      - name: Install PDFium
+        run: python .github/scripts/pdfium.py
+      - run: cargo build --release --locked --package tahweel-cli --target "$TARGET"
+      - name: Package
+        run: |
+          name="tahweel-$VERSION-$TARGET"
+          pdfium=$(dirname "$(dirname "$TAHWEEL_TEST_PDFIUM")")
+          mkdir -p "$name/docs" dist
+          cp "target/$TARGET/release/tahweel$EXE_SUFFIX" "$TAHWEEL_TEST_PDFIUM" \
+            README.md LICENSE target/release-notices/THIRD-PARTY-LICENSES "$name/"
+          cp "$pdfium/LICENSE" "$name/PDFIUM-LICENSE"
+          cp -R "$pdfium/licenses" "$name/licenses"
+          cp docs/cli.md docs/tahweel.1 "$name/docs/"
+          if [ "$RUNNER_OS" = Windows ]; then
+            archive="$name.zip"
+            7z a "dist/$archive" "$name"
+          else
+            archive="$name.tar.gz"
+            tar -czf "dist/$archive" "$name"
+          fi
+          cd dist
+          if [ "$RUNNER_OS" = macOS ]; then
+            shasum -a 256 "$archive"
+          else
+            sha256sum "$archive"
+          fi > "$archive.sha256"
+      - name: Smoke test the extracted archive
+        run: |
+          name="tahweel-$VERSION-$TARGET"
+          mkdir -p "$RUNNER_TEMP/tahweel-extracted" "$RUNNER_TEMP/tahweel-cwd"
+          if [ "$RUNNER_OS" = Windows ]; then
+            7z x "dist/$name.zip" "-o$RUNNER_TEMP/tahweel-extracted"
+          else
+            tar -xzf "dist/$name.tar.gz" -C "$RUNNER_TEMP/tahweel-extracted"
+          fi
+          bundle="$RUNNER_TEMP/tahweel-extracted/$name"
+          test -s "$bundle/$(basename "$TAHWEEL_TEST_PDFIUM")"
+          test -s "$bundle/docs/cli.md"
+          test -s "$bundle/THIRD-PARTY-LICENSES"
+          test -s "$bundle/PDFIUM-LICENSE"
+          test -d "$bundle/licenses"
+          (cd "$RUNNER_TEMP/tahweel-cwd" && "$bundle/tahweel$EXE_SUFFIX" --version)
+          TAHWEEL_TEST_PDFIUM="$bundle/$(basename "$TAHWEEL_TEST_PDFIUM")" \
+            cargo test --release --locked -p tahweel --target "$TARGET"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tahweel-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  upload:
+    name: Attach to the release
+    needs: build
+    if: github.event_name == 'release' || inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: tahweel-*
+          path: dist
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"

@@ -1,0 +1,4 @@
+# Keep accepted licenses in sync with deny.toml.
+accepted = ["Apache-2.0", "BSD-3-Clause", "CDLA-Permissive-2.0", "ISC", "MIT", "MPL-2.0", "Unicode-3.0", "Zlib"]
+ignore-dev-dependencies = true
+# No target filter: include platform-specific crates and certificate data in one file.

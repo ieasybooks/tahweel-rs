@@ -1,0 +1,36 @@
+[package]
+name = "tahweel"
+description = "OCR for PDFs and images into TXT, DOCX and JSON: page rendering, pluggable recognizers and output writers."
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "../../README.md"
+keywords.workspace = true
+categories = ["text-processing", "multimedia::images"]
+
+[dependencies]
+async-trait.workspace = true
+dunce.workspace = true
+image.workspace = true
+imprimatur.workspace = true
+pdfium-render.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["macros", "rt", "sync"] }
+tokio-util.workspace = true
+unicode-general-category.workspace = true
+unicode-script.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+roxmltree.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "time"] }
+zip.workspace = true
+
+[lints]
+workspace = true

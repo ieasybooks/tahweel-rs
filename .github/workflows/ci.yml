@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: fmt, clippy, test, dependencies, spelling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Installs the toolchain pinned in rust-toolchain.toml, with rustfmt and clippy.
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Install development tools
+        uses: jdx/mise-action@v5.2.3
+      - name: Check workspace versions and release-please dependency names
+        run: |
+          cargo metadata --no-deps --locked --format-version 1 \
+            | jq -e '
+              .packages as $packages |
+              ([$packages[].version] | unique) as $versions |
+              ($versions | length) == 1 and
+              all($packages[].dependencies[] |
+                  select(.path != null) |
+                  select(.name as $name | any($packages[]; .name == $name));
+                  .rename == null and .req == ("^" + $versions[0]))'
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Install the pinned PDFium test runtime
+        run: python .github/scripts/pdfium.py
+      - run: cargo test --workspace --locked
+      - run: cargo deny --locked check
+      # Release archives include these notices; fail here when a new license isn't accepted.
+      - name: Check dependency notices
+        run: cargo about generate --locked --all-features --workspace --fail about.hbs --output-file "$RUNNER_TEMP/THIRD-PARTY-LICENSES"
+      - run: actionlint
+      - run: typos
+      - name: Check generated CLI reference
+        run: |
+          sh scripts/cli-docs.sh
+          git diff --exit-code -- docs/
+
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      # aws-lc-sys (reqwest's TLS) otherwise needs NASM to build on Windows.
+      AWS_LC_SYS_PREBUILT_NASM: 1
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Install the pinned PDFium test runtime
+        run: python .github/scripts/pdfium.py
+      - run: cargo test --workspace --locked
