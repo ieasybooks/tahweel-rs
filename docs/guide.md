@@ -43,9 +43,11 @@ export TAHWEEL_SERVICE_ACCOUNTS=/path/to/key-a.json,/path/to/key-b.json
 tahweel books/ --recognizer drive-service-account -r -o text
 ```
 
-The default is eight page operations per account, including upload, export and deletion. `--drive-concurrency N` changes this limit for every supplied account. With keys for two accounts, eight per account permits up to sixteen page operations across the run. Work is shared across accounts page by page, including pages from a single PDF. Use keys for distinct accounts when adding capacity.
+The default maximum is eight page operations per account, including upload, export and deletion. `--drive-concurrency N` changes this maximum for every supplied account. With keys for two accounts, eight per account permits up to sixteen page operations across the run. Work is shared across accounts page by page, including pages from a single PDF. Use keys for distinct accounts when adding capacity.
 
-`--drive-concurrency` also applies to the single account selected by `drive-oauth`. Transient HTTP failures are retried with backoff; `--drive-attempts` defaults to five attempts per operation, including the first. Rate-limit responses have a separate bounded retry budget. Drive requests have a 180-second total deadline and a 20-second connection timeout. Lower concurrency when a slow connection cannot keep up with uploads.
+`--drive-concurrency` also applies to the single account selected by `drive-oauth`. Each account starts at the configured maximum. A timeout (including HTTP 408), connection or other transport error, or HTTP 5xx response halves that account's current limit, rounding down to a minimum of one. After as many consecutive successful Drive requests as the current limit, the limit rises by one, up to the configured maximum. Any failed request resets that success count. Accounts adapt independently; active pages keep running and new pages wait for capacity. Limit changes are logged at debug level (`-v`), with a warning when an account drops to one page at a time.
+
+Transient HTTP failures are retried with backoff; `--drive-attempts` defaults to five attempts per operation, including the first. Rate-limit responses keep their existing account holds and separate bounded retry budget; they do not halve concurrency. Drive requests have a 180-second total deadline and a 20-second connection timeout. You can still lower the configured maximum when a slow connection cannot keep up with uploads.
 
 ## Inputs and outputs
 

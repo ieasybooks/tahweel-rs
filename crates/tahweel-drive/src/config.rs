@@ -23,6 +23,9 @@ pub struct DriveConfig {
     /// OCR language hint, e.g. `Some("ar".into())`; `None` lets Drive detect it.
     pub language: Option<String>,
     /// Maximum concurrent page operations per account, including cleanup. Defaults to 8.
+    /// Each account starts at this limit, halves it on timeouts, transport errors or 5xx
+    /// responses, and grows it by one after `limit` consecutive successful requests.
+    /// The limit never falls below 1 or rises above this maximum; active pages finish normally.
     pub concurrency_per_account: usize,
     /// Attempts per HTTP operation, including the first; rate limits have a separate budget.
     pub max_attempts: u32,

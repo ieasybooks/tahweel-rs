@@ -235,6 +235,8 @@ async fn retry_classes_and_rate_limit_budget() {
         let server = MockServer::start().await;
         no_leftovers(&server).await;
         tokens(&server).await;
+        let logs = LogBuffer::default();
+        let _capture = logs.capture_debug();
         Mock::given(method("POST"))
             .and(path("/upload/drive/v3/files"))
             .respond_with(failure(status, reason))
@@ -259,6 +261,12 @@ async fn retry_classes_and_rate_limit_budget() {
             .recognize_page(&page())
             .await
             .unwrap();
+        assert_eq!(
+            logs.text()
+                .matches("lowered Google Drive concurrency")
+                .count(),
+            if rate_limit { 0 } else { 2 }
+        );
     }
 }
 
@@ -339,6 +347,8 @@ async fn request_timeouts_are_retried() {
     let server = MockServer::start().await;
     no_leftovers(&server).await;
     tokens(&server).await;
+    let logs = LogBuffer::default();
+    let _capture = logs.capture_debug();
     Mock::given(method("POST"))
         .and(path("/upload/drive/v3/files"))
         .respond_with(uploaded().set_delay(Duration::from_secs(2)))
@@ -363,6 +373,93 @@ async fn request_timeouts_are_retried() {
         .recognize_page(&page())
         .await
         .unwrap();
+    assert!(
+        logs.text()
+            .contains("lowered Google Drive concurrency lane=0 previous_limit=8 limit=4")
+    );
+}
+
+#[tokio::test]
+async fn adaptive_concurrency_recovers_and_logs_when_a_lane_reaches_one() {
+    let server = MockServer::start().await;
+    no_leftovers(&server).await;
+    tokens(&server).await;
+    let logs = LogBuffer::default();
+    let _capture = logs.capture_debug();
+    Mock::given(method("POST"))
+        .and(path("/upload/drive/v3/files"))
+        .respond_with(failure(503, ""))
+        .up_to_n_times(4)
+        .with_priority(1)
+        .expect(4)
+        .mount(&server)
+        .await;
+    success(&server).await;
+    let mut cfg = config(&server, &["one"]);
+    cfg.max_attempts = 1;
+    let recognizer = DriveRecognizer::new(cfg).await.unwrap();
+    for _ in 0..4 {
+        assert!(recognizer.recognize_page(&page()).await.is_err());
+    }
+    assert_eq!(recognizer.max_in_flight(), 8);
+    let text = logs.text();
+    for (previous, limit) in [(8, 4), (4, 2), (2, 1)] {
+        assert!(text.contains(&format!(
+            "lowered Google Drive concurrency lane=0 previous_limit={previous} limit={limit}"
+        )));
+    }
+    assert_eq!(text.matches("lowered Google Drive concurrency").count(), 3);
+    let warnings: Vec<_> = text.lines().filter(|line| line.contains("WARN")).collect();
+    assert_eq!(warnings.len(), 1);
+    assert!(warnings[0].contains("Google Drive lane reduced to one page at a time lane=0"));
+    // Thirty successful upload/export/delete requests recover from one to eight.
+    for _ in 0..10 {
+        assert_eq!(
+            recognizer.recognize_page(&page()).await.unwrap().text,
+            "نص\nعربي"
+        );
+    }
+    let text = logs.text();
+    for limit in 2..=8 {
+        assert!(text.contains(&format!(
+            "raised Google Drive concurrency lane=0 previous_limit={} limit={limit}",
+            limit - 1
+        )));
+    }
+    assert_eq!(text.matches("raised Google Drive concurrency").count(), 7);
+    assert_eq!(recognizer.max_in_flight(), 8);
+}
+
+#[tokio::test]
+async fn upload_connection_failures_reduce_concurrency() {
+    let socket = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let address = socket.local_addr().unwrap();
+    drop(socket);
+    let server = MockServer::start().await;
+    no_leftovers(&server).await;
+    tokens(&server).await;
+    let logs = LogBuffer::default();
+    let _capture = logs.capture_debug();
+    let mut cfg = config(&server, &["one", "two", "three", "four", "five"]);
+    cfg.upload_base = format!("http://{address}/upload");
+    cfg.max_attempts = 1;
+    let recognizer = DriveRecognizer::new(cfg).await.unwrap();
+    assert_eq!(recognizer.max_in_flight(), 40);
+    let DriveError::Request(error) = recognizer.recognize_page(&page()).await.unwrap_err() else {
+        panic!("expected a connection error");
+    };
+    assert!(error.is_connect());
+    assert_eq!(recognizer.max_in_flight(), 40);
+    assert!(
+        logs.text()
+            .contains("lowered Google Drive concurrency lane=0 previous_limit=8 limit=4")
+    );
+    assert_eq!(
+        logs.text()
+            .matches("lowered Google Drive concurrency")
+            .count(),
+        1
+    );
 }
 
 #[tokio::test]
@@ -896,7 +993,58 @@ impl std::io::Write for LogBuffer {
     }
 }
 
+thread_local! {
+    static CAPTURE: std::cell::RefCell<Option<LogBuffer>> = const { std::cell::RefCell::new(None) };
+}
+
+/// Writes to the buffer captured on the current thread, if any.
+struct ThreadCapture;
+
+impl std::io::Write for ThreadCapture {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        CAPTURE.with_borrow_mut(|capture| match capture {
+            Some(buffer) => buffer.write(bytes),
+            None => Ok(bytes.len()),
+        })
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+/// Stops capturing on this thread when dropped.
+struct CaptureGuard;
+
+impl Drop for CaptureGuard {
+    fn drop(&mut self) {
+        CAPTURE.set(None);
+    }
+}
+
 impl LogBuffer {
+    /// Captures debug logs of the current thread (the tokio test runtime's only thread).
+    ///
+    /// One global debug subscriber serves every test. Per-thread subscribers installed by
+    /// tests running in parallel can make tracing skip debug events, because it decides once
+    /// per call site whether any subscriber is interested.
+    fn capture_debug(&self) -> CaptureGuard {
+        static GLOBAL: std::sync::Once = std::sync::Once::new();
+        GLOBAL.call_once(|| {
+            tracing::subscriber::set_global_default(
+                tracing_subscriber::fmt()
+                    .without_time()
+                    .with_ansi(false)
+                    .with_max_level(tracing::Level::DEBUG)
+                    .with_writer(|| ThreadCapture)
+                    .finish(),
+            )
+            .unwrap();
+        });
+        CAPTURE.set(Some(self.clone()));
+        CaptureGuard
+    }
+
     fn text(&self) -> String {
         String::from_utf8(self.0.lock().unwrap().clone()).unwrap()
     }
@@ -909,14 +1057,7 @@ async fn startup_cleanup_filters_old_tagged_files_and_follows_all_pages() {
     let server = MockServer::start().await;
     tokens(&server).await;
     let logs = LogBuffer::default();
-    let writer = logs.clone();
-    let _subscriber = tracing::subscriber::set_default(
-        tracing_subscriber::fmt()
-            .without_time()
-            .with_ansi(false)
-            .with_writer(move || writer.clone())
-            .finish(),
-    );
+    let _capture = logs.capture_debug();
     Mock::given(method("GET"))
         .and(path("/drive/v3/files"))
         .and(query_param("fields", "nextPageToken,files(id)"))
@@ -1026,14 +1167,7 @@ async fn cleanup_list_failures_warn_and_do_not_stop_recognition() {
         tokens(&server).await;
         success(&server).await;
         let logs = LogBuffer::default();
-        let writer = logs.clone();
-        let _subscriber = tracing::subscriber::set_default(
-            tracing_subscriber::fmt()
-                .without_time()
-                .with_ansi(false)
-                .with_writer(move || writer.clone())
-                .finish(),
-        );
+        let _capture = logs.capture_debug();
         Mock::given(method("GET"))
             .and(path("/drive/v3/files"))
             .respond_with(ResponseTemplate::new(status).set_body_string("invalid list"))
@@ -1061,14 +1195,7 @@ async fn cleanup_delete_failures_warn_and_continue_to_other_files_and_pages() {
     tokens(&server).await;
     success(&server).await;
     let logs = LogBuffer::default();
-    let writer = logs.clone();
-    let _subscriber = tracing::subscriber::set_default(
-        tracing_subscriber::fmt()
-            .without_time()
-            .with_ansi(false)
-            .with_writer(move || writer.clone())
-            .finish(),
-    );
+    let _capture = logs.capture_debug();
     Mock::given(method("GET"))
         .and(path("/drive/v3/files"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
@@ -1151,6 +1278,8 @@ async fn closed_connections_and_truncated_bodies_are_retried_for_every_operation
         Vec::new(),
         b"HTTP/1.1 200 OK\r\nContent-Length: 100\r\nConnection: close\r\n\r\n{".to_vec(),
     ] {
+        let logs = LogBuffer::default();
+        let _capture = logs.capture_debug();
         let (base, server) = transport::server(vec![
             failure.clone(),
             transport::response(
@@ -1175,6 +1304,12 @@ async fn closed_connections_and_truncated_bodies_are_retried_for_every_operation
         cfg.max_attempts = 2;
         let recognizer = DriveRecognizer::new(cfg).await.unwrap();
         assert_eq!(recognizer.recognize_page(&page()).await.unwrap().text, "نص");
+        assert_eq!(
+            logs.text()
+                .matches("lowered Google Drive concurrency")
+                .count(),
+            4
+        );
         let requests = server.await.unwrap();
         let methods: Vec<_> = requests
             .iter()
