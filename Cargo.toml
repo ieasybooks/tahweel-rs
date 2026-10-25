@@ -1,7 +1,7 @@
 [package]
 name = "tahweel-cli"
 description = "Command-line OCR of PDFs and images into TXT, DOCX and JSON with tahweel."
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -21,8 +21,8 @@ anyhow.workspace = true
 dirs.workspace = true
 indicatif.workspace = true
 reqwest.workspace = true
-tahweel = { path = "crates/tahweel", version = "0.1.0" }
-tahweel-drive = { path = "crates/tahweel-drive", version = "0.1.0" }
+tahweel = { path = "crates/tahweel", version = "0.1.1" }
+tahweel-drive = { path = "crates/tahweel-drive", version = "0.1.1" }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "signal"] }
 tokio-util.workspace = true
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
