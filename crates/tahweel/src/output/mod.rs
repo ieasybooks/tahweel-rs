@@ -6,6 +6,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 pub use layout::OutputMode;
+pub(crate) use layout::{Layout, Target};
 
 use crate::{Error, Result};
 

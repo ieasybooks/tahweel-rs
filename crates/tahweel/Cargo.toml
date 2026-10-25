@@ -13,17 +13,23 @@ categories = ["text-processing", "multimedia::images"]
 [dependencies]
 async-trait.workspace = true
 dunce.workspace = true
+image.workspace = true
 imprimatur.workspace = true
+pdfium-render.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+sha2.workspace = true
 tempfile.workspace = true
 thiserror.workspace = true
+tokio = { workspace = true, features = ["macros", "rt", "sync"] }
+tokio-util.workspace = true
 unicode-general-category.workspace = true
 unicode-script.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
 roxmltree.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "time"] }
 zip.workspace = true
 
 [lints]

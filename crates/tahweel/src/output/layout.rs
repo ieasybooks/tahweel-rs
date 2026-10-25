@@ -29,25 +29,11 @@ impl OutputMode {
 }
 
 /// One document's output directory and reserved name.
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "Used by the pipeline in the next implementation step."
-    )
-)]
 pub(crate) struct Target {
     pub(crate) dir: PathBuf,
     pub(crate) name: String,
 }
 
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "Used by the pipeline in the next implementation step."
-    )
-)]
 impl Target {
     pub(crate) fn exists(&self, writer: &OutputWriter) -> bool {
         writer.exists(&self.dir, &self.name)
@@ -55,13 +41,6 @@ impl Target {
 }
 
 /// Run-wide layout and reservations for output files and their parent directories.
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "Used by the pipeline in the next implementation step."
-    )
-)]
 pub(crate) struct Layout {
     mode: OutputMode,
     writer: OutputWriter,
@@ -71,13 +50,6 @@ pub(crate) struct Layout {
     names: HashSet<String>,
 }
 
-#[cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "Used by the pipeline in the next implementation step."
-    )
-)]
 impl Layout {
     pub(crate) fn new(mode: OutputMode, writer: OutputWriter, inputs: &[Input]) -> Self {
         let separate_roots = inputs

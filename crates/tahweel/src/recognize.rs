@@ -87,6 +87,14 @@ pub enum ImageFormat {
 }
 
 impl ImageFormat {
+    /// The lowercase file extension, without a dot.
+    pub fn extension(self) -> &'static str {
+        match self {
+            Self::Jpeg => "jpg",
+            Self::Png => "png",
+        }
+    }
+
     /// The media type, e.g. `image/jpeg`.
     pub fn mime_type(self) -> &'static str {
         match self {
