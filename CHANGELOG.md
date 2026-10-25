@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/ieasybooks/tahweel-rs/compare/v0.1.1...v0.2.0) (2026-10-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **drive:** let Drive detect the OCR language
+
+### Features
+
+* **drive:** let Drive detect the OCR language ([90172ba](https://github.com/ieasybooks/tahweel-rs/commit/90172baf670e90efb86f1f56957a04399d0359da))
+* **drive:** load service-account keys from JSON text ([3f6a885](https://github.com/ieasybooks/tahweel-rs/commit/3f6a885cbcf6ec5a9160551dbffd5f0a73bc6493))
+* **drive:** load service-account keys from JSON text ([161c7c7](https://github.com/ieasybooks/tahweel-rs/commit/161c7c7249fbe74038d907cf7b0cc4af14dac84b))
+* **drive:** lower concurrency when requests time out ([899f897](https://github.com/ieasybooks/tahweel-rs/commit/899f89774c4f528421da1c26e1228dbdae15a595))
+* **drive:** lower concurrency when requests time out ([3985656](https://github.com/ieasybooks/tahweel-rs/commit/398565658cade8f3408ff522fd1ac3cc12631bfe))
+
 ## [0.1.1](https://github.com/ieasybooks/tahweel-rs/compare/v0.1.0...v0.1.1) (2026-10-25)
 
 
