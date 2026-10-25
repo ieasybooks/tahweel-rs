@@ -1,7 +1,7 @@
 [package]
 name = "tahweel"
 description = "OCR for PDFs and images into TXT, DOCX and JSON: page rendering, pluggable recognizers and output writers."
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true

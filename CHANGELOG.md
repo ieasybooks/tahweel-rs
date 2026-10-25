@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/ieasybooks/tahweel-rs/compare/v0.1.0...v0.1.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* **drive:** stop cutting off uploads that take more than a minute ([9503bb9](https://github.com/ieasybooks/tahweel-rs/commit/9503bb96dcf0151bd9f2da305a7363f2653994e2))
+* **drive:** stop cutting off uploads that take more than a minute ([ebe0f2d](https://github.com/ieasybooks/tahweel-rs/commit/ebe0f2d4cbc157e7020862f123274ae70272720c))
+
 ## 0.1.0 (2026-10-25)
 
 
