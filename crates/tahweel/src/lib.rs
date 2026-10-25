@@ -5,7 +5,11 @@
 //! their own crates: `tahweel-drive` runs OCR through Google Drive.
 
 mod error;
+mod input;
+mod output;
 mod recognize;
 
 pub use error::{BoxError, Error, ErrorChain, Result};
+pub use input::{Document, DocumentKind, Input};
+pub use output::{Format, OutputMode, OutputWriter};
 pub use recognize::{ImageFormat, PageImage, Recognition, Recognizer};

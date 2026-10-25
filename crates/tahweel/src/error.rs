@@ -16,6 +16,21 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
+    /// An explicit input is not a supported document.
+    #[error("unsupported input {path}; expected a PDF, JPEG or PNG file, or a directory")]
+    UnsupportedInput {
+        /// The input path.
+        path: std::path::PathBuf,
+    },
+    /// Output could not be rendered.
+    #[error("rendering {format} output")]
+    Output {
+        /// The output format.
+        format: crate::Format,
+        /// The underlying writer error.
+        #[source]
+        source: BoxError,
+    },
     /// A file system operation failed.
     #[error("{context}")]
     Io {
