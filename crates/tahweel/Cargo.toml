@@ -1,0 +1,16 @@
+[package]
+name = "tahweel"
+description = "OCR for PDFs and images into TXT, DOCX and JSON: page rendering, pluggable recognizers and output writers."
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "../../README.md"
+keywords.workspace = true
+categories = ["text-processing", "multimedia::images"]
+
+[dependencies]
+
+[lints]
+workspace = true

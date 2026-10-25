@@ -1,0 +1,55 @@
+[package]
+name = "tahweel-cli"
+description = "Command-line OCR of PDFs and images into TXT, DOCX and JSON with tahweel."
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories = ["command-line-utilities", "text-processing"]
+include = ["src/**", "docs/**", "Cargo.toml", "README.md", "LICENSE"]
+
+[[bin]]
+name = "tahweel"
+path = "src/main.rs"
+doc = false
+
+[dependencies]
+tahweel = { path = "crates/tahweel", version = "0.0.0" }
+tahweel-drive = { path = "crates/tahweel-drive", version = "0.0.0" }
+
+[lints]
+workspace = true
+
+[workspace]
+resolver = "3"
+members = ["crates/tahweel", "crates/tahweel-drive"]
+default-members = [".", "crates/tahweel", "crates/tahweel-drive"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.99"
+license = "MIT"
+repository = "https://github.com/ieasybooks/tahweel-rs"
+keywords = ["ocr", "pdf", "arabic", "docx", "google-drive"]
+
+[workspace.dependencies]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

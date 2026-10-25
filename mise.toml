@@ -1,0 +1,7 @@
+[settings]
+idiomatic_version_file_enable_tools = ["rust"]
+
+[tools]
+cargo-deny = "0.20.2"
+typos = "1.51.1"
+usage = "7.1.2"

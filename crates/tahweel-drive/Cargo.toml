@@ -1,0 +1,17 @@
+[package]
+name = "tahweel-drive"
+description = "Google Drive OCR recognizer for tahweel, with service-account and OAuth sign-in."
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "../../README.md"
+keywords.workspace = true
+categories = ["text-processing", "api-bindings"]
+
+[dependencies]
+tahweel = { path = "../tahweel", version = "0.0.0" }
+
+[lints]
+workspace = true
