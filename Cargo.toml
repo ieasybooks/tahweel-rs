@@ -37,21 +37,32 @@ keywords = ["ocr", "pdf", "arabic", "docx", "google-drive"]
 
 [workspace.dependencies]
 async-trait = "0.1.92"
+aws-lc-rs = "1.18.2"
+base64 = "0.23.1"
+bytes = "1.12.1"
 dunce = "1.0.5"
+httpdate = "1.0.3"
 image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
 imprimatur = "0.6.1"
 insta = "1.49.0"
+jsonwebtoken = { version = "11.1.0", features = ["aws_lc_rs"] }
 pdfium-render = { version = "0.9.4", default-features = false, features = ["pdfium_7881", "image_025", "thread_safe"] }
+rand = "0.10.3"
+reqwest = { version = "0.13.5", features = ["json", "form", "query"] }
 roxmltree = "0.21.2"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 sha2 = "0.11.1"
 tempfile = "3.27.0"
 thiserror = "2.0.21"
+time = { version = "0.3.55", features = ["formatting"] }
 tokio = "1.54.1"
 tokio-util = { version = "0.7.20", features = ["rt"] }
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
 unicode-general-category = "1.1.0"
 unicode-script = "0.5.8"
+wiremock = "0.6.5"
 zip = { version = "9.1.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
 
 [workspace.lints.rust]
