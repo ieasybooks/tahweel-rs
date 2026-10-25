@@ -44,6 +44,7 @@ Completed pages are saved in `tahweel/checkpoints` under your user cache directo
 
 ## Documentation
 
+- [User guide](https://github.com/ieasybooks/tahweel-rs/blob/main/docs/guide.md): sign-in, output layouts, resuming, defaults and library examples.
 - [CLI reference](docs/cli.md): all options, examples and exit codes; also available with `tahweel --help`.
 - [Man page](docs/tahweel.1).
 - [Defaults evaluation](docs/benchmarks/defaults-2026-10-25.md): Arabic page accuracy, image sizing and Drive request measurements.
