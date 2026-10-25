@@ -1,0 +1,9 @@
+/target/
+
+# Google service account keys used for local tests. Never commit them.
+.service_account*
+*.service_account.json
+
+.env
+.DS_Store
+Thumbs.db
