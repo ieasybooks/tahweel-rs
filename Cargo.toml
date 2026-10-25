@@ -9,7 +9,7 @@ repository.workspace = true
 readme = "README.md"
 keywords.workspace = true
 categories = ["command-line-utilities", "text-processing"]
-include = ["src/**", "docs/**", "Cargo.toml", "README.md", "LICENSE"]
+include = ["src/**", "docs/**", "!docs/benchmarks/**", "Cargo.toml", "README.md", "LICENSE"]
 
 [[bin]]
 name = "tahweel"

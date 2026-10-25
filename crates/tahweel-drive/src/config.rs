@@ -21,13 +21,13 @@ pub struct DriveConfig {
     pub auth: DriveAuth,
     /// OCR language, e.g. `ar`.
     pub language: String,
-    /// Maximum concurrent page operations per account, including cleanup.
+    /// Maximum concurrent page operations per account, including cleanup. Defaults to 8.
     pub concurrency_per_account: usize,
     /// Attempts per HTTP operation, including the first; rate limits have a separate budget.
     pub max_attempts: u32,
     /// Maximum encoded image size, in bytes.
     pub max_image_bytes: usize,
-    /// Timeout for each complete HTTP request, including its response body.
+    /// Timeout for each complete HTTP request, including its response body. Defaults to 180 seconds.
     pub request_timeout: Duration,
     /// Initial ceiling for full-jitter retry delays.
     pub retry_base_delay: Duration,
@@ -42,15 +42,15 @@ pub struct DriveConfig {
 }
 
 impl DriveConfig {
-    /// Defaults for these credentials: Arabic, four pages per account and five attempts.
+    /// Defaults for these credentials: Arabic, eight pages per account and five attempts.
     pub fn new(auth: DriveAuth) -> Self {
         Self {
             auth,
             language: "ar".into(),
-            concurrency_per_account: 4,
+            concurrency_per_account: 8,
             max_attempts: DEFAULT_MAX_ATTEMPTS,
             max_image_bytes: 2_000_000,
-            request_timeout: Duration::from_secs(120),
+            request_timeout: Duration::from_secs(180),
             retry_base_delay: DEFAULT_RETRY_BASE_DELAY,
             retry_max_delay: DEFAULT_RETRY_MAX_DELAY,
             api_base: "https://www.googleapis.com".into(),

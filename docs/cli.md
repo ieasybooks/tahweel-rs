@@ -42,7 +42,7 @@ tahweel completions zsh --install
 
 Convert PDFs and images into TXT, DOCX and JSON with Google Drive OCR.
 
-Inputs can be PDF, JPEG and PNG files, or folders containing them. Every page is recognized, including PDFs that already have a text layer.
+Inputs can be PDF, JPEG and PNG files, or folders containing them. Every page is recognized, including PDFs that already have a text layer. Pages use grayscale PNG. Image inputs are capped at a 2,339-pixel long edge without enlargement. Pages over 2,000,000 bytes fall back to JPEG, then shrink to fit.
 
 ### Arguments
 - **`<INPUT>…`** — PDF, JPEG and PNG files or folders to convert.
@@ -87,9 +87,9 @@ Inputs can be PDF, JPEG and PNG files, or folders containing them. Every page is
 
   **Environment Variable:** `TAHWEEL_SERVICE_ACCOUNTS`
 - **`--drive-token <FILE>`** — drive-oauth: saved sign-in file [default: tahweel/google-token.json in the local data directory, such as ~/.local/share/tahweel/google-token.json on Linux]. A missing file starts browser sign-in. Delete this file to sign out.
-- **`--drive-concurrency <N>`** — Both Drive recognizers: maximum concurrent pages per account.
+- **`--drive-concurrency <N>`** — Both Drive recognizers: maximum concurrent pages per account, including cleanup.
 
-  **Default:** `4`
+  **Default:** `8`
 - **`--drive-attempts <N>`** — Both Drive recognizers: attempts per HTTP operation, including the first.
 
   **Default:** `5`

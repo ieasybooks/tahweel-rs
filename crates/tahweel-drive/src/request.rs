@@ -15,7 +15,7 @@ pub(crate) const DEFAULT_RETRY_MAX_DELAY: Duration = Duration::from_secs(60);
 
 pub(crate) fn client(timeout: Duration) -> Result<Client, DriveError> {
     Client::builder()
-        .connect_timeout(Duration::from_secs(10).min(timeout))
+        .connect_timeout(Duration::from_secs(20).min(timeout))
         .read_timeout(Duration::from_secs(60).min(timeout))
         .timeout(timeout)
         .redirect(reqwest::redirect::Policy::none())

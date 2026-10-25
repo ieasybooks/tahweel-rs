@@ -1,0 +1,1554 @@
+{
+  "description": "Selected unchanged aggregates and reported table cells from the completed 2026-10-25 defaults evaluation. No OCR outputs or request logs.",
+  "units": {
+    "accuracy": "fraction of reference length; page-macro means",
+    "paired_differences": "second minus first, in fractions; multiply by 100 for percentage points",
+    "table_cells": "strings preserve the final report precision and units in column headings"
+  },
+  "completed_utc": "2026-10-25T17:23:56.322252+00:00",
+  "source_sha256": {
+    "results/summary-resolution-all.json": "ffeee93ccac87ed4f2c71fe434ff479b583d106fc2f5bc68a5815d874f444975",
+    "results/summary-encoding.json": "9d85d4e8f380f1726c489c80de0ee6d023fa29df89d8df7b203d4d1c3bd70d1f",
+    "results/summary-sharpen.json": "38b02606fc7b3c97f79a6dd3216340e9f0a5a54d906e7d9529ae0b3bf208b675",
+    "results/summary-native.json": "23210573d187dc5b75357eabd4b1ef5eacee71a4bcda8694093051310d32a359",
+    "results/summary-image-resize.json": "b675f20625639e81e4816a9e8f765263ae55b9f1948feff2341ef10bdd3c3a0d",
+    "results/summary-language.json": "88fcc60a80d068ca2b1f43b56d5e0fa5c25af28626be6d464b5c8d0df5d04f56",
+    "results/summary-resolution-all-paired.json": "094af5d1d92b72c90642545dd4d025a4f2243bf67442a1a69d5790da05432731",
+    "results/summary-encoding-paired.json": "61d2c404b962a215dccfc7483f3aad58b925a23a2df80ad282340826f74cfc57",
+    "results/diagnostics.json": "5c951c36a0181a35d86f995bb167a8c3b86d3fd6b9ef8b87051cba2ce49e473b",
+    "results/verification.json": "5412f37d194ebde55a1a86b68cf2477125066f28703eb8fefd6d933d8ea95c05",
+    "decisions.json": "b573dd39e26d56d3ac5abb50956c0e4584f32ab76a9694d12e896f1604db19a6",
+    "runtime.json": "597ef753e4de48bb04a1862e6af9e492fbe7e75aebae8b888bc8adb86d2c7494",
+    "dependencies.json": "71936c72642610caf258d5058b7c57c2d6e993269d784437b1e901eb5f79984f",
+    "evaluate.py": "7c792a7b4b2c9ea576463fd015bf92576b405f738eb04f67c5557e73fb61bc5c",
+    "../../reports/REPORT-defaults.md": "6d9bc07c3fbdb64f24609b0ebc81b47904424eec3224ba50165d6ad6882508ee"
+  },
+  "runtime": {
+    "python": "3.13.14",
+    "pypdfium2": "5.14.0",
+    "pdfium": "156.0.8076.0",
+    "pillow_raqm": "0.11.0",
+    "pillow_harfbuzz": "14.5.0",
+    "pillow_freetype": "2.14.3"
+  },
+  "dependency_versions": {
+    "pypdfium2": "5.14.0",
+    "Pillow": "13.0.0",
+    "httpx": "0.28.1",
+    "rapidfuzz": "3.14.6",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "fpdf2": "2.8.9",
+    "aiohttp": "3.14.5"
+  },
+  "accuracy": {
+    "resolution-all": [
+      {
+        "phase": "resolution-all",
+        "dataset": "all",
+        "variant": "d150-rgb-j85",
+        "n": 177,
+        "successes": 177,
+        "bytes_mean": 306933.9604519774,
+        "bytes_maximum": 499007.0,
+        "normalized_cer_mean": 0.11761095636228695,
+        "normalized_cer_median": 0.05211912943871707,
+        "normalized_cer_ci_low": 0.0915375399719661,
+        "normalized_cer_ci_high": 0.14506760054008414,
+        "normalized_wer_mean": 0.23771360221919371,
+        "normalized_wer_median": 0.1498371335504886,
+        "normalized_wer_ci_low": 0.20365627092670693,
+        "normalized_wer_ci_high": 0.27270433720363835
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "all",
+        "variant": "d200-rgb-j85",
+        "n": 177,
+        "successes": 177,
+        "bytes_mean": 448909.42937853106,
+        "bytes_maximum": 730555.0,
+        "normalized_cer_mean": 0.11596436291933872,
+        "normalized_cer_median": 0.05751824817518248,
+        "normalized_cer_ci_low": 0.09144132034771611,
+        "normalized_cer_ci_high": 0.1439616463027827,
+        "normalized_wer_mean": 0.23308873002717115,
+        "normalized_wer_median": 0.14962593516209477,
+        "normalized_wer_ci_low": 0.201393753579107,
+        "normalized_wer_ci_high": 0.2674108136451781
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "all",
+        "variant": "d250-rgb-j85",
+        "n": 177,
+        "successes": 177,
+        "bytes_mean": 602602.5988700564,
+        "bytes_maximum": 967509.0,
+        "normalized_cer_mean": 0.11992677829659741,
+        "normalized_cer_median": 0.05313092979127135,
+        "normalized_cer_ci_low": 0.09390774915760729,
+        "normalized_cer_ci_high": 0.14882700012900832,
+        "normalized_wer_mean": 0.24050771204700225,
+        "normalized_wer_median": 0.15738963531669867,
+        "normalized_wer_ci_low": 0.20669676290637318,
+        "normalized_wer_ci_high": 0.2767100706477009
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "all",
+        "variant": "d300-rgb-j85",
+        "n": 177,
+        "successes": 177,
+        "bytes_mean": 765131.813559322,
+        "bytes_maximum": 1210870.0,
+        "normalized_cer_mean": 0.12106196874687246,
+        "normalized_cer_median": 0.06147323794382618,
+        "normalized_cer_ci_low": 0.095172061120222,
+        "normalized_cer_ci_high": 0.15174535043276263,
+        "normalized_wer_mean": 0.2412328200986352,
+        "normalized_wer_median": 0.15847860538827258,
+        "normalized_wer_ci_low": 0.20687788107613833,
+        "normalized_wer_ci_high": 0.2785357490798869
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "misraj",
+        "variant": "d150-rgb-j85",
+        "n": 47,
+        "successes": 47,
+        "bytes_mean": 227258.89361702127,
+        "bytes_maximum": 430956.0,
+        "normalized_cer_mean": 0.07430896905263645,
+        "normalized_cer_median": 0.04453781512605042,
+        "normalized_cer_ci_low": 0.05001014829916492,
+        "normalized_cer_ci_high": 0.10513555709962444,
+        "normalized_wer_mean": 0.14218589490110894,
+        "normalized_wer_median": 0.11206896551724138,
+        "normalized_wer_ci_low": 0.11051364394615078,
+        "normalized_wer_ci_high": 0.1772620010882114
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "misraj",
+        "variant": "d200-rgb-j85",
+        "n": 47,
+        "successes": 47,
+        "bytes_mean": 334710.6808510638,
+        "bytes_maximum": 641416.0,
+        "normalized_cer_mean": 0.06749162086294305,
+        "normalized_cer_median": 0.03800786369593709,
+        "normalized_cer_ci_low": 0.04398370966923412,
+        "normalized_cer_ci_high": 0.09953200996427398,
+        "normalized_wer_mean": 0.13847630413585574,
+        "normalized_wer_median": 0.1115702479338843,
+        "normalized_wer_ci_low": 0.1062538223501727,
+        "normalized_wer_ci_high": 0.1793441103378205
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "misraj",
+        "variant": "d250-rgb-j85",
+        "n": 47,
+        "successes": 47,
+        "bytes_mean": 453794.12765957444,
+        "bytes_maximum": 920028.0,
+        "normalized_cer_mean": 0.0715667287250867,
+        "normalized_cer_median": 0.04508748317631225,
+        "normalized_cer_ci_low": 0.04827889279817937,
+        "normalized_cer_ci_high": 0.10235823943762397,
+        "normalized_wer_mean": 0.14401602376479838,
+        "normalized_wer_median": 0.11904761904761904,
+        "normalized_wer_ci_low": 0.11364642917374998,
+        "normalized_wer_ci_high": 0.17843910475742844
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "misraj",
+        "variant": "d300-rgb-j85",
+        "n": 47,
+        "successes": 47,
+        "bytes_mean": 593328.5744680851,
+        "bytes_maximum": 1180764.0,
+        "normalized_cer_mean": 0.07259427077508242,
+        "normalized_cer_median": 0.04039301310043668,
+        "normalized_cer_ci_low": 0.047480090421887805,
+        "normalized_cer_ci_high": 0.10754814320303795,
+        "normalized_wer_mean": 0.14430972013142737,
+        "normalized_wer_median": 0.10714285714285714,
+        "normalized_wer_ci_low": 0.11165403295800493,
+        "normalized_wer_ci_high": 0.18671685426730422
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "nod",
+        "variant": "d150-rgb-j85",
+        "n": 50,
+        "successes": 50,
+        "bytes_mean": 239537.7,
+        "bytes_maximum": 386877.0,
+        "normalized_cer_mean": 0.07657783288145348,
+        "normalized_cer_median": 0.0891734070331572,
+        "normalized_cer_ci_low": 0.06624820095883399,
+        "normalized_cer_ci_high": 0.08631139097474734,
+        "normalized_wer_mean": 0.30690060156423354,
+        "normalized_wer_median": 0.36104503510646857,
+        "normalized_wer_ci_low": 0.26997036611782954,
+        "normalized_wer_ci_high": 0.34091174489196724
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "nod",
+        "variant": "d200-rgb-j85",
+        "n": 50,
+        "successes": 50,
+        "bytes_mean": 356997.98,
+        "bytes_maximum": 574778.0,
+        "normalized_cer_mean": 0.07080396979943622,
+        "normalized_cer_median": 0.08250258354765772,
+        "normalized_cer_ci_low": 0.06092463497493595,
+        "normalized_cer_ci_high": 0.0810148467026466,
+        "normalized_wer_mean": 0.283382530103402,
+        "normalized_wer_median": 0.3304667695750074,
+        "normalized_wer_ci_low": 0.247990186327979,
+        "normalized_wer_ci_high": 0.3164099459122013
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "nod",
+        "variant": "d250-rgb-j85",
+        "n": 50,
+        "successes": 50,
+        "bytes_mean": 488973.64,
+        "bytes_maximum": 776730.0,
+        "normalized_cer_mean": 0.07322535516396649,
+        "normalized_cer_median": 0.08560129728675656,
+        "normalized_cer_ci_low": 0.062464952232681996,
+        "normalized_cer_ci_high": 0.08440540821236671,
+        "normalized_wer_mean": 0.29246158981349735,
+        "normalized_wer_median": 0.34049009667699603,
+        "normalized_wer_ci_low": 0.257309240536049,
+        "normalized_wer_ci_high": 0.3268719383168097
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "nod",
+        "variant": "d300-rgb-j85",
+        "n": 50,
+        "successes": 50,
+        "bytes_mean": 631093.4,
+        "bytes_maximum": 970902.0,
+        "normalized_cer_mean": 0.0772384173656398,
+        "normalized_cer_median": 0.08754348579929976,
+        "normalized_cer_ci_low": 0.06686082951486151,
+        "normalized_cer_ci_high": 0.08716053689228763,
+        "normalized_wer_mean": 0.2974036553409984,
+        "normalized_wer_median": 0.344281904678292,
+        "normalized_wer_ci_low": 0.2622665188675825,
+        "normalized_wer_ci_high": 0.3310940513194695
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "synthetic",
+        "variant": "d150-rgb-j85",
+        "n": 80,
+        "successes": 80,
+        "bytes_mean": 395865.725,
+        "bytes_maximum": 499007.0,
+        "normalized_cer_mean": 0.16869657608222757,
+        "normalized_cer_median": 0.03871656022289013,
+        "normalized_cer_ci_low": 0.11487751683696,
+        "normalized_cer_ci_high": 0.2290772537177321,
+        "normalized_wer_mean": 0.25059425567791854,
+        "normalized_wer_median": 0.10925324675324675,
+        "normalized_wer_ci_low": 0.18494171307601656,
+        "normalized_wer_ci_high": 0.32601391452457956
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "synthetic",
+        "variant": "d200-rgb-j85",
+        "n": 80,
+        "successes": 80,
+        "bytes_mean": 573445.85,
+        "bytes_maximum": 730555.0,
+        "normalized_cer_mean": 0.17266734457741023,
+        "normalized_cer_median": 0.044045597172162165,
+        "normalized_cer_ci_low": 0.11859265910481426,
+        "normalized_cer_ci_high": 0.23004206031507435,
+        "normalized_wer_mean": 0.25723990519067474,
+        "normalized_wer_median": 0.1162356074253936,
+        "normalized_wer_ci_low": 0.19203270540208506,
+        "normalized_wer_ci_high": 0.3276632214086895
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "synthetic",
+        "variant": "d250-rgb-j85",
+        "n": 80,
+        "successes": 80,
+        "bytes_mean": 761045.675,
+        "bytes_maximum": 967509.0,
+        "normalized_cer_mean": 0.1775266968777543,
+        "normalized_cer_median": 0.03639658494340686,
+        "normalized_cer_ci_low": 0.12492345887409925,
+        "normalized_cer_ci_high": 0.23506768481280033,
+        "normalized_wer_mean": 0.26472540530873767,
+        "normalized_wer_median": 0.12539969908644621,
+        "normalized_wer_ci_low": 0.19961934514442184,
+        "normalized_wer_ci_high": 0.3366112183378311
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "synthetic",
+        "variant": "d300-rgb-j85",
+        "n": 80,
+        "successes": 80,
+        "bytes_mean": 949840.225,
+        "bytes_maximum": 1210870.0,
+        "normalized_cer_mean": 0.17692646091856948,
+        "normalized_cer_median": 0.030617228659891246,
+        "normalized_cer_ci_low": 0.12382170600490125,
+        "normalized_cer_ci_high": 0.23520879187913807,
+        "normalized_wer_mean": 0.2630683693028928,
+        "normalized_wer_median": 0.12508890469416784,
+        "normalized_wer_ci_low": 0.1981174309660306,
+        "normalized_wer_ci_high": 0.33434893541225663
+      }
+    ],
+    "encoding": [
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-gray-j60",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 236044.16666666666,
+        "bytes_maximum": 404239.0,
+        "normalized_cer_mean": 0.13400351123363946,
+        "normalized_cer_median": 0.07549374342571835,
+        "normalized_cer_ci_low": 0.08549520242444081,
+        "normalized_cer_ci_high": 0.1911581123992633,
+        "normalized_wer_mean": 0.2657387711785165,
+        "normalized_wer_median": 0.18761417610522468,
+        "normalized_wer_ci_low": 0.20372597253234775,
+        "normalized_wer_ci_high": 0.33367083187443086
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-gray-j75",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 291846.537037037,
+        "bytes_maximum": 512157.0,
+        "normalized_cer_mean": 0.13083311936688916,
+        "normalized_cer_median": 0.07232737571590153,
+        "normalized_cer_ci_low": 0.08077692529652017,
+        "normalized_cer_ci_high": 0.18734100571606305,
+        "normalized_wer_mean": 0.2591555919964049,
+        "normalized_wer_median": 0.16443916697113628,
+        "normalized_wer_ci_low": 0.19655972927825344,
+        "normalized_wer_ci_high": 0.32791165879849327
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-gray-j85",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 370889.25925925927,
+        "bytes_maximum": 684036.0,
+        "normalized_cer_mean": 0.13146209972064568,
+        "normalized_cer_median": 0.06904444326889651,
+        "normalized_cer_ci_low": 0.08200164019222377,
+        "normalized_cer_ci_high": 0.18803929626790108,
+        "normalized_wer_mean": 0.2578287859333239,
+        "normalized_wer_median": 0.15726342710997443,
+        "normalized_wer_ci_low": 0.19442140796327753,
+        "normalized_wer_ci_high": 0.3287557748487888
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-gray-j95",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 618653.3888888889,
+        "bytes_maximum": 1228486.0,
+        "normalized_cer_mean": 0.12915902385204056,
+        "normalized_cer_median": 0.06745573787789111,
+        "normalized_cer_ci_low": 0.07895640932521521,
+        "normalized_cer_ci_high": 0.1871632774373982,
+        "normalized_wer_mean": 0.2523830574937387,
+        "normalized_wer_median": 0.1624625502374863,
+        "normalized_wer_ci_low": 0.18770922492238148,
+        "normalized_wer_ci_high": 0.32219390129740316
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-gray-png",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 640602.7222222222,
+        "bytes_maximum": 1671481.0,
+        "normalized_cer_mean": 0.1282228055870216,
+        "normalized_cer_median": 0.06228819626748126,
+        "normalized_cer_ci_low": 0.07723169657712173,
+        "normalized_cer_ci_high": 0.18838256304735687,
+        "normalized_wer_mean": 0.24911055953310393,
+        "normalized_wer_median": 0.15676171654432525,
+        "normalized_wer_ci_low": 0.1850117023340089,
+        "normalized_wer_ci_high": 0.3189613453045799
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-rgb-j60",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 252952.5,
+        "bytes_maximum": 421755.0,
+        "normalized_cer_mean": 0.13374257114358995,
+        "normalized_cer_median": 0.06709044386293042,
+        "normalized_cer_ci_low": 0.08381862846998853,
+        "normalized_cer_ci_high": 0.1893184244388985,
+        "normalized_wer_mean": 0.26574975641747867,
+        "normalized_wer_median": 0.17702594081110706,
+        "normalized_wer_ci_low": 0.2012621589430216,
+        "normalized_wer_ci_high": 0.3310871348492701
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-rgb-j75",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 309026.962962963,
+        "bytes_maximum": 529706.0,
+        "normalized_cer_mean": 0.13106578356666973,
+        "normalized_cer_median": 0.07330584929711484,
+        "normalized_cer_ci_low": 0.08293503547835049,
+        "normalized_cer_ci_high": 0.19079919929861505,
+        "normalized_wer_mean": 0.25989757759233933,
+        "normalized_wer_median": 0.16443916697113628,
+        "normalized_wer_ci_low": 0.1974666445001254,
+        "normalized_wer_ci_high": 0.331082583743269
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-rgb-j85",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 388688.22222222225,
+        "bytes_maximum": 702414.0,
+        "normalized_cer_mean": 0.13057771024085146,
+        "normalized_cer_median": 0.06904444326889651,
+        "normalized_cer_ci_low": 0.08321211318876827,
+        "normalized_cer_ci_high": 0.18768850887303268,
+        "normalized_wer_mean": 0.2573712854621277,
+        "normalized_wer_median": 0.15726342710997443,
+        "normalized_wer_ci_low": 0.19615345349589325,
+        "normalized_wer_ci_high": 0.32412051128671526
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-rgb-j95",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 637800.3333333334,
+        "bytes_maximum": 1246901.0,
+        "normalized_cer_mean": 0.12880478943954113,
+        "normalized_cer_median": 0.06759614787508292,
+        "normalized_cer_ci_low": 0.08189479548562296,
+        "normalized_cer_ci_high": 0.18715977839429404,
+        "normalized_wer_mean": 0.2518187445745123,
+        "normalized_wer_median": 0.1640153452685422,
+        "normalized_wer_ci_low": 0.19305867110060046,
+        "normalized_wer_ci_high": 0.3205031258575854
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "variant": "d200-rgb-png",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 1325690.3333333333,
+        "bytes_maximum": 3550208.0,
+        "normalized_cer_mean": 0.128348803890861,
+        "normalized_cer_median": 0.06228819626748126,
+        "normalized_cer_ci_low": 0.07599564140075145,
+        "normalized_cer_ci_high": 0.18548052132233675,
+        "normalized_wer_mean": 0.2495668530080076,
+        "normalized_wer_median": 0.16669711362805992,
+        "normalized_wer_ci_low": 0.18342120753606136,
+        "normalized_wer_ci_high": 0.3189583448043775
+      }
+    ],
+    "sharpen": [
+      {
+        "phase": "sharpen",
+        "dataset": "all",
+        "variant": "d200-gray-png-sharp0",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 640602.7222222222,
+        "bytes_maximum": 1671481.0,
+        "normalized_cer_mean": 0.12822416738291864,
+        "normalized_cer_median": 0.06203413122683086,
+        "normalized_cer_ci_low": 0.08184612426710235,
+        "normalized_cer_ci_high": 0.18799032730124882,
+        "normalized_wer_mean": 0.24953606525688515,
+        "normalized_wer_median": 0.15986730660643705,
+        "normalized_wer_ci_low": 0.19102102789219869,
+        "normalized_wer_ci_high": 0.3180270835341116
+      },
+      {
+        "phase": "sharpen",
+        "dataset": "all",
+        "variant": "d200-gray-png-sharp1",
+        "n": 54,
+        "successes": 54,
+        "bytes_mean": 634125.6481481482,
+        "bytes_maximum": 1595947.0,
+        "normalized_cer_mean": 0.1331228308320011,
+        "normalized_cer_median": 0.07233481063449201,
+        "normalized_cer_ci_low": 0.08501423759388065,
+        "normalized_cer_ci_high": 0.19096580681142086,
+        "normalized_wer_mean": 0.25162251292112325,
+        "normalized_wer_median": 0.1946000492247108,
+        "normalized_wer_ci_low": 0.19152753542195033,
+        "normalized_wer_ci_high": 0.31921737913866327
+      }
+    ],
+    "native": [
+      {
+        "phase": "native",
+        "dataset": "all",
+        "variant": "cap2339-no-upscale-rgb-j85",
+        "n": 47,
+        "successes": 47,
+        "bytes_mean": 235048.6595744681,
+        "bytes_maximum": 713828.0,
+        "normalized_cer_mean": 0.07800131872120161,
+        "normalized_cer_median": 0.05111402359108781,
+        "normalized_cer_ci_low": 0.05371566079347126,
+        "normalized_cer_ci_high": 0.10873792886592194,
+        "normalized_wer_mean": 0.1485751813316267,
+        "normalized_wer_median": 0.11884057971014493,
+        "normalized_wer_ci_low": 0.11773017099222022,
+        "normalized_wer_ci_high": 0.18451955645966908
+      }
+    ],
+    "image-resize": [
+      {
+        "phase": "image-resize",
+        "dataset": "all",
+        "variant": "edge2339-lanczos-rgb-j85",
+        "n": 47,
+        "successes": 47,
+        "bytes_mean": 347909.5106382979,
+        "bytes_maximum": 711661.0,
+        "normalized_cer_mean": 0.07371063428323536,
+        "normalized_cer_median": 0.04423592493297587,
+        "normalized_cer_ci_low": 0.0484806635872758,
+        "normalized_cer_ci_high": 0.10860043802749815,
+        "normalized_wer_mean": 0.1443437120959318,
+        "normalized_wer_median": 0.10714285714285714,
+        "normalized_wer_ci_low": 0.1109581308897769,
+        "normalized_wer_ci_high": 0.1850414027798003
+      }
+    ],
+    "language": [
+      {
+        "phase": "language",
+        "dataset": "all",
+        "variant": "ar",
+        "n": 177,
+        "successes": 177,
+        "bytes_mean": 760312.2090395481,
+        "bytes_maximum": 1671481.0,
+        "normalized_cer_mean": 0.11389800645345845,
+        "normalized_cer_median": 0.05553087516659263,
+        "normalized_cer_ci_low": 0.08753917525462453,
+        "normalized_cer_ci_high": 0.1434093662045997,
+        "normalized_wer_mean": 0.22518151093724462,
+        "normalized_wer_median": 0.1396103896103896,
+        "normalized_wer_ci_low": 0.1906314505252887,
+        "normalized_wer_ci_high": 0.2609127970444275
+      },
+      {
+        "phase": "language",
+        "dataset": "all",
+        "variant": "auto",
+        "n": 177,
+        "successes": 177,
+        "bytes_mean": 760312.2090395481,
+        "bytes_maximum": 1671481.0,
+        "normalized_cer_mean": 0.11409492689335816,
+        "normalized_cer_median": 0.05553087516659263,
+        "normalized_cer_ci_low": 0.08810598118224415,
+        "normalized_cer_ci_high": 0.1421188141570273,
+        "normalized_wer_mean": 0.22546711061794306,
+        "normalized_wer_median": 0.1401151631477927,
+        "normalized_wer_ci_low": 0.1925962060763157,
+        "normalized_wer_ci_high": 0.2611960150030822
+      }
+    ]
+  },
+  "paired": {
+    "resolution": [
+      {
+        "phase": "resolution-all",
+        "dataset": "all",
+        "first": "d150-rgb-j85",
+        "second": "d200-rgb-j85",
+        "n": 177,
+        "interpretation": "second minus first; negative means second has less error",
+        "normalized_cer": {
+          "mean": -0.0016465934429482519,
+          "ci_low": -0.004342487836533967,
+          "ci_high": 0.0011121039711576013,
+          "improved": 104,
+          "worsened": 71,
+          "tied": 2
+        },
+        "normalized_wer": {
+          "mean": -0.004624872192022543,
+          "ci_low": -0.008743248169720611,
+          "ci_high": -2.3984215325196143e-05,
+          "improved": 108,
+          "worsened": 63,
+          "tied": 6
+        }
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "nod",
+        "first": "d150-rgb-j85",
+        "second": "d200-rgb-j85",
+        "n": 50,
+        "interpretation": "second minus first; negative means second has less error",
+        "normalized_cer": {
+          "mean": -0.005773863082017259,
+          "ci_low": -0.007855108944388579,
+          "ci_high": -0.0035829084996108563,
+          "improved": 43,
+          "worsened": 7,
+          "tied": 0
+        },
+        "normalized_wer": {
+          "mean": -0.023518071460831607,
+          "ci_low": -0.02767140027688903,
+          "ci_high": -0.019089901343450098,
+          "improved": 45,
+          "worsened": 3,
+          "tied": 2
+        }
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "misraj",
+        "first": "d150-rgb-j85",
+        "second": "d200-rgb-j85",
+        "n": 47,
+        "interpretation": "second minus first; negative means second has less error",
+        "normalized_cer": {
+          "mean": -0.0068173481896933955,
+          "ci_low": -0.013276606807231561,
+          "ci_high": -0.0008398619111333106,
+          "improved": 28,
+          "worsened": 18,
+          "tied": 1
+        },
+        "normalized_wer": {
+          "mean": -0.0037095907652531803,
+          "ci_low": -0.013503680114570787,
+          "ci_high": 0.006793066452099431,
+          "improved": 25,
+          "worsened": 20,
+          "tied": 2
+        }
+      },
+      {
+        "phase": "resolution-all",
+        "dataset": "synthetic",
+        "first": "d150-rgb-j85",
+        "second": "d200-rgb-j85",
+        "n": 80,
+        "interpretation": "second minus first; negative means second has less error",
+        "normalized_cer": {
+          "mean": 0.00397076849518265,
+          "ci_low": -0.00042671828425947417,
+          "ci_high": 0.008965997371793199,
+          "improved": 33,
+          "worsened": 46,
+          "tied": 1
+        },
+        "normalized_wer": {
+          "mean": 0.006645649512756121,
+          "ci_low": 0.0005384986814145672,
+          "ci_high": 0.013566691864785693,
+          "improved": 38,
+          "worsened": 40,
+          "tied": 2
+        }
+      }
+    ],
+    "encoding": [
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "first": "d200-gray-j95",
+        "second": "d200-gray-png",
+        "n": 54,
+        "interpretation": "second minus first; negative means second has less error",
+        "normalized_cer": {
+          "mean": -0.000936218265018988,
+          "ci_low": -0.0021970977498378683,
+          "ci_high": 0.0003631932822869574,
+          "improved": 27,
+          "worsened": 19,
+          "tied": 8
+        },
+        "normalized_wer": {
+          "mean": -0.003272497960634754,
+          "ci_low": -0.005854856205349619,
+          "ci_high": -0.0007450089573357199,
+          "improved": 29,
+          "worsened": 20,
+          "tied": 5
+        }
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "first": "d200-gray-png",
+        "second": "d200-rgb-j85",
+        "n": 54,
+        "interpretation": "second minus first; negative means second has less error",
+        "normalized_cer": {
+          "mean": 0.0023549046538298914,
+          "ci_low": 0.0002288158625732787,
+          "ci_high": 0.004294807697452286,
+          "improved": 17,
+          "worsened": 30,
+          "tied": 7
+        },
+        "normalized_wer": {
+          "mean": 0.008260725929023738,
+          "ci_low": 0.00421490408972235,
+          "ci_high": 0.012410357684066934,
+          "improved": 17,
+          "worsened": 30,
+          "tied": 7
+        }
+      },
+      {
+        "phase": "encoding",
+        "dataset": "all",
+        "first": "d200-gray-png",
+        "second": "d200-rgb-png",
+        "n": 54,
+        "interpretation": "second minus first; negative means second has less error",
+        "normalized_cer": {
+          "mean": 0.00012599830383947387,
+          "ci_low": -0.00010276545439789934,
+          "ci_high": 0.00036601407760562555,
+          "improved": 5,
+          "worsened": 8,
+          "tied": 41
+        },
+        "normalized_wer": {
+          "mean": 0.0004562934749036276,
+          "ci_low": -0.00014085423418697446,
+          "ci_high": 0.0011586494580366725,
+          "improved": 3,
+          "worsened": 7,
+          "tied": 44
+        }
+      }
+    ],
+    "language": {
+      "all": {
+        "n": 177,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.0001969204398997094,
+          "ci_low": -0.00042822920821655454,
+          "ci_high": -1.2961309807669028e-05,
+          "improved": 15,
+          "worsened": 11,
+          "tied": 151
+        },
+        "normalized_wer": {
+          "mean": -0.0002855996806984606,
+          "ci_low": -0.0005717875828551579,
+          "ci_high": -2.8746416502924068e-05,
+          "improved": 16,
+          "worsened": 9,
+          "tied": 152
+        }
+      },
+      "arabic": {
+        "n": 150,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.00020376956413083479,
+          "ci_low": -0.000466128876908072,
+          "ci_high": 4.814473391659552e-06,
+          "improved": 12,
+          "worsened": 9,
+          "tied": 129
+        },
+        "normalized_wer": {
+          "mean": -0.0002978832908303795,
+          "ci_low": -0.0006155872379990193,
+          "ci_high": -2.4017658945586173e-05,
+          "improved": 14,
+          "worsened": 7,
+          "tied": 129
+        }
+      },
+      "arabic-english": {
+        "n": 20,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.0001565817605633304,
+          "ci_low": -0.0005656572970354059,
+          "ci_high": 8.348476025327121e-05,
+          "improved": 1,
+          "worsened": 2,
+          "tied": 17
+        },
+        "normalized_wer": {
+          "mean": 0.00018160019746817584,
+          "ci_low": 0.0,
+          "ci_high": 0.00048397334179625505,
+          "improved": 0,
+          "worsened": 2,
+          "tied": 18
+        }
+      },
+      "arabic-latin": {
+        "n": 7,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.00016540686162239037,
+          "ci_low": -0.0003339734491107955,
+          "ci_high": 0.0,
+          "improved": 2,
+          "worsened": 0,
+          "tied": 5
+        },
+        "normalized_wer": {
+          "mean": -0.0013572362583477299,
+          "ci_low": -0.0031843973287255345,
+          "ci_high": 0.0,
+          "improved": 2,
+          "worsened": 0,
+          "tied": 5
+        }
+      },
+      "nod": {
+        "n": 50,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -2.3421585373781943e-06,
+          "ci_low": -8.830633964013689e-05,
+          "ci_high": 8.635067001102959e-05,
+          "improved": 5,
+          "worsened": 4,
+          "tied": 41
+        },
+        "normalized_wer": {
+          "mean": -2.9060853970212798e-05,
+          "ci_low": -0.0003413936600074391,
+          "ci_high": 0.00029157846717372887,
+          "improved": 5,
+          "worsened": 4,
+          "tied": 41
+        }
+      },
+      "misraj": {
+        "n": 47,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.00021908248576886117,
+          "ci_low": -0.0006362593869987256,
+          "ci_high": 1.9008920712525967e-05,
+          "improved": 5,
+          "worsened": 1,
+          "tied": 41
+        },
+        "normalized_wer": {
+          "mean": -0.00044135638393802,
+          "ci_low": -0.001081732325741249,
+          "ci_high": 5.905727821017377e-05,
+          "improved": 5,
+          "worsened": 1,
+          "tied": 41
+        }
+      },
+      "synthetic": {
+        "n": 80,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.00030551166380303967,
+          "ci_low": -0.000734058719664465,
+          "ci_high": 2.3814915626590724e-05,
+          "improved": 5,
+          "worsened": 6,
+          "tied": 69
+        },
+        "normalized_wer": {
+          "mean": -0.0003544293842503742,
+          "ci_low": -0.0008337111757952453,
+          "ci_high": 4.8183137022018565e-05,
+          "improved": 6,
+          "worsened": 4,
+          "tied": 70
+        }
+      }
+    },
+    "validation": {
+      "all": {
+        "n": 177,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.002066356465880263,
+          "ci_low": -0.003538534922472222,
+          "ci_high": -0.000590711058693018,
+          "improved": 103,
+          "worsened": 56,
+          "tied": 18
+        },
+        "normalized_wer": {
+          "mean": -0.007907219089926606,
+          "ci_low": -0.01090636845791981,
+          "ci_high": -0.005073336464332153,
+          "improved": 92,
+          "worsened": 52,
+          "tied": 33
+        }
+      },
+      "nod": {
+        "n": 50,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.004623288869267961,
+          "ci_low": -0.006081351380729689,
+          "ci_high": -0.0032225655561989052,
+          "improved": 40,
+          "worsened": 8,
+          "tied": 2
+        },
+        "normalized_wer": {
+          "mean": -0.02032756970226519,
+          "ci_low": -0.025110689294339437,
+          "ci_high": -0.015677893674218544,
+          "improved": 46,
+          "worsened": 2,
+          "tied": 2
+        }
+      },
+      "misraj": {
+        "n": 47,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": 0.00027752996892033946,
+          "ci_low": -0.003351605260663492,
+          "ci_high": 0.0046750934380255715,
+          "improved": 24,
+          "worsened": 17,
+          "tied": 6
+        },
+        "normalized_wer": {
+          "mean": -0.0029568844491245426,
+          "ci_low": -0.01046101314889336,
+          "ci_high": 0.0034454515601499863,
+          "improved": 16,
+          "worsened": 14,
+          "tied": 17
+        }
+      },
+      "synthetic": {
+        "n": 80,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": -0.001845306994208306,
+          "ci_low": -0.003993293350858487,
+          "ci_high": 0.0001457990308110015,
+          "improved": 39,
+          "worsened": 31,
+          "tied": 10
+        },
+        "normalized_wer": {
+          "mean": -0.0030528215586862056,
+          "ci_low": -0.006378129935652139,
+          "ci_high": -0.0002348250641435907,
+          "improved": 30,
+          "worsened": 36,
+          "tied": 14
+        }
+      }
+    },
+    "repeat_controls": {
+      "encoding_to_unsharpened_repeat": {
+        "n": 54,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": 1.3617958971201422e-06,
+          "ci_low": -0.000288836382678458,
+          "ci_high": 0.00025504229395875006,
+          "improved": 4,
+          "worsened": 6,
+          "tied": 44
+        },
+        "normalized_wer": {
+          "mean": 0.00042550572378119585,
+          "ci_low": -3.7236781400052506e-05,
+          "ci_high": 0.0009865834657966422,
+          "improved": 2,
+          "worsened": 5,
+          "tied": 47
+        }
+      },
+      "sharpened_vs_control": {
+        "n": 54,
+        "interpretation": "second minus first; negative favors second",
+        "normalized_cer": {
+          "mean": 0.0048986634490824355,
+          "ci_low": 0.0002507418712774951,
+          "ci_high": 0.010390985826707335,
+          "improved": 27,
+          "worsened": 25,
+          "tied": 2
+        },
+        "normalized_wer": {
+          "mean": 0.002086447664238058,
+          "ci_low": -0.00425087147088453,
+          "ci_high": 0.009157328831189873,
+          "improved": 28,
+          "worsened": 24,
+          "tied": 2
+        }
+      }
+    }
+  },
+  "english_only": {
+    "method": "ASCII alphabetic word sequences, case-folded; English paragraph only, digits and punctuation excluded; separate from the full-page WER",
+    "summary": {
+      "ar": {
+        "mean": 0.002,
+        "median": 0.0,
+        "p10": 0.0,
+        "p90": 0.0,
+        "p95": 0.0020000000000000287,
+        "maximum": 0.04,
+        "ci_low": 0.0,
+        "ci_high": 0.006
+      },
+      "auto": {
+        "mean": 0.002,
+        "median": 0.0,
+        "p10": 0.0,
+        "p90": 0.0,
+        "p95": 0.0020000000000000287,
+        "maximum": 0.04,
+        "ci_low": 0.0,
+        "ci_high": 0.006
+      }
+    },
+    "paired_ar_minus_auto": {
+      "n": 20,
+      "mean": 0.0,
+      "median": 0.0,
+      "p10": 0.0,
+      "p90": 0.0,
+      "p95": 0.0,
+      "maximum": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "improved": 0,
+      "worsened": 0,
+      "tied": 20,
+      "identical_word_sequences": 20
+    }
+  },
+  "tables": {
+    "size": {
+      "columns": [
+        "Page",
+        "Target bytes",
+        "Actual bytes",
+        "Upload type",
+        "Success",
+        "Norm CER %",
+        "Output chars",
+        "Upload s",
+        "Export s",
+        "Delete s",
+        "Total s",
+        "HTTP",
+        "Reason"
+      ],
+      "rows": [
+        [
+          "nod-10023",
+          "0",
+          "521653",
+          "multipart",
+          "True",
+          "11.615",
+          "1624",
+          "12.94",
+          "0.84",
+          "0.66",
+          "14.44",
+          "200",
+          ""
+        ],
+        [
+          "nod-10023",
+          "2000000",
+          "2000057",
+          "resumable",
+          "True",
+          "11.615",
+          "1624",
+          "44.38",
+          "0.92",
+          "0.70",
+          "46.00",
+          "200",
+          ""
+        ],
+        [
+          "nod-10023",
+          "3000000",
+          "2999994",
+          "multipart",
+          "True",
+          "11.615",
+          "1624",
+          "55.48",
+          "0.95",
+          "0.73",
+          "57.19",
+          "200",
+          ""
+        ],
+        [
+          "nod-10023",
+          "5000000",
+          "5002186",
+          "resumable",
+          "True",
+          "11.192",
+          "1624",
+          "68.88",
+          "0.92",
+          "0.70",
+          "70.52",
+          "200",
+          ""
+        ],
+        [
+          "nod-10023",
+          "10000000",
+          "9999979",
+          "resumable",
+          "True",
+          "11.192",
+          "1624",
+          "221.15",
+          "1.74",
+          "3.37",
+          "226.30",
+          "200",
+          ""
+        ],
+        [
+          "nod-10023",
+          "20000000",
+          "19999699",
+          "resumable",
+          "False",
+          "—",
+          "—",
+          "—",
+          "—",
+          "—",
+          "299.58",
+          "413",
+          "uploadTooLarge"
+        ],
+        [
+          "synthetic-012",
+          "0",
+          "1466061",
+          "multipart",
+          "True",
+          "8.641",
+          "3549",
+          "28.23",
+          "0.99",
+          "0.68",
+          "29.96",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-012",
+          "2000000",
+          "2000003",
+          "resumable",
+          "True",
+          "8.641",
+          "3549",
+          "45.50",
+          "0.91",
+          "0.69",
+          "47.12",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-012",
+          "3000000",
+          "3000032",
+          "multipart",
+          "True",
+          "8.641",
+          "3549",
+          "58.98",
+          "0.87",
+          "0.71",
+          "60.60",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-012",
+          "5000000",
+          "5000185",
+          "resumable",
+          "True",
+          "8.281",
+          "3542",
+          "78.15",
+          "0.93",
+          "0.71",
+          "79.81",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-012",
+          "10000000",
+          "10005151",
+          "multipart",
+          "True",
+          "8.641",
+          "3549",
+          "173.57",
+          "1.02",
+          "0.74",
+          "175.38",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-012",
+          "20000000",
+          "19998766",
+          "resumable",
+          "False",
+          "—",
+          "—",
+          "—",
+          "—",
+          "—",
+          "325.07",
+          "413",
+          "uploadTooLarge"
+        ],
+        [
+          "synthetic-014",
+          "0",
+          "1059727",
+          "multipart",
+          "True",
+          "1.925",
+          "2109",
+          "25.25",
+          "0.92",
+          "0.77",
+          "26.94",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-014",
+          "2000000",
+          "2000090",
+          "resumable",
+          "True",
+          "1.925",
+          "2109",
+          "42.04",
+          "0.76",
+          "0.69",
+          "43.50",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-014",
+          "3000000",
+          "2999881",
+          "multipart",
+          "True",
+          "1.925",
+          "2109",
+          "52.98",
+          "0.80",
+          "0.74",
+          "54.55",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-014",
+          "5000000",
+          "5000246",
+          "resumable",
+          "True",
+          "1.925",
+          "2109",
+          "89.07",
+          "0.82",
+          "0.76",
+          "90.67",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-014",
+          "10000000",
+          "10000803",
+          "resumable",
+          "True",
+          "1.925",
+          "2109",
+          "121.55",
+          "0.89",
+          "0.80",
+          "123.25",
+          "200",
+          ""
+        ],
+        [
+          "synthetic-014",
+          "20000000",
+          "19999705",
+          "resumable",
+          "False",
+          "—",
+          "—",
+          "—",
+          "—",
+          "—",
+          "304.45",
+          "413",
+          "uploadTooLarge"
+        ]
+      ]
+    },
+    "concurrency": {
+      "columns": [
+        "Concurrency",
+        "Pages",
+        "Round 0/1 pages/min",
+        "Combined pages/min",
+        "Page failures",
+        "HTTP errors",
+        "Upload median/p95/max s",
+        "Export median/p95/max s",
+        "Delete median/p95/max s"
+      ],
+      "rows": [
+        [
+          "1",
+          "24",
+          "2.73/3.73",
+          "3.15",
+          "0",
+          "0",
+          "14.16/30.98/64.83",
+          "0.85/1.08/1.35",
+          "0.72/0.98/1.08"
+        ],
+        [
+          "2",
+          "24",
+          "5.46/5.88",
+          "5.66",
+          "0",
+          "0",
+          "17.86/22.14/23.68",
+          "1.02/1.34/1.36",
+          "0.74/0.98/1.12"
+        ],
+        [
+          "4",
+          "24",
+          "10.94/8.91",
+          "9.82",
+          "0",
+          "0",
+          "19.34/27.75/44.03",
+          "0.82/1.31/1.36",
+          "0.70/0.98/1.74"
+        ],
+        [
+          "8",
+          "24",
+          "18.15/14.77",
+          "16.28",
+          "0",
+          "0",
+          "17.36/25.11/30.69",
+          "0.81/1.06/1.13",
+          "0.71/1.01/1.19"
+        ]
+      ]
+    },
+    "request_timings": {
+      "columns": [
+        "Operation",
+        "Attempts/pages",
+        "Mean s",
+        "Median s",
+        "p95 s",
+        "p99 s",
+        "Maximum s",
+        "Errors"
+      ],
+      "rows": [
+        [
+          "upload",
+          "355",
+          "0.60",
+          "0.56",
+          "0.88",
+          "1.21",
+          "1.72",
+          "0"
+        ],
+        [
+          "upload-chunk",
+          "465",
+          "16.73",
+          "15.60",
+          "29.01",
+          "40.24",
+          "46.74",
+          "0"
+        ],
+        [
+          "export",
+          "354",
+          "0.87",
+          "0.85",
+          "1.11",
+          "1.25",
+          "1.88",
+          "0"
+        ],
+        [
+          "delete",
+          "355",
+          "0.75",
+          "0.70",
+          "1.02",
+          "1.17",
+          "5.12",
+          "0"
+        ],
+        [
+          "whole upload per page",
+          "354",
+          "22.52",
+          "18.58",
+          "47.79",
+          "64.33",
+          "71.85",
+          "see request rows"
+        ]
+      ]
+    },
+    "image_sizing_differences": {
+      "columns": [
+        "Comparison",
+        "Paired pages",
+        "Mean delta pp",
+        "95% CI pp",
+        "Improved",
+        "Worsened",
+        "Tied"
+      ],
+      "rows": [
+        [
+          "Native/capped minus forced 2339 long edge",
+          "47",
+          "1.051",
+          "[0.374, 1.842]",
+          "13",
+          "32",
+          "2"
+        ],
+        [
+          "Direct 2339 Lanczos minus native/capped",
+          "47",
+          "-0.429",
+          "[-1.366, 0.465]",
+          "27",
+          "16",
+          "4"
+        ],
+        [
+          "Direct 2339 Lanczos minus 200-DPI PDFium",
+          "47",
+          "0.622",
+          "[0.158, 1.221]",
+          "15",
+          "29",
+          "3"
+        ]
+      ]
+    }
+  },
+  "audit": {
+    "raw_completed_cases": 1935,
+    "effective_cases": 1928,
+    "successes": 1925,
+    "successful_recoveries": 4,
+    "images_rehashed": 1600,
+    "upload_attempts": 1957,
+    "peak_recorded_requests": 8,
+    "upload_starts_without_response": 10,
+    "drive_audit": {
+      "utc": "2026-10-25T17:23:17.712759+00:00",
+      "baseline_count": 2,
+      "current_count": 2,
+      "baseline_ids_still_present": 2,
+      "own_remaining": 0,
+      "own_name_remaining": 0
+    }
+  }
+}

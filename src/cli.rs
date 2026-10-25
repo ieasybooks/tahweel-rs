@@ -87,6 +87,8 @@ pub(crate) struct Completions {
 ///
 /// Inputs can be PDF, JPEG and PNG files, or folders containing them.
 /// Every page is recognized, including PDFs that already have a text layer.
+/// Pages use grayscale PNG. Image inputs are capped at a 2,339-pixel long edge without
+/// enlargement. Pages over 2,000,000 bytes fall back to JPEG, then shrink to fit.
 #[derive(Debug, Clone, usage_rs::Args)]
 #[usage(
     unknown_flags = "error",
@@ -241,8 +243,8 @@ pub(crate) struct Drive {
     #[usage(long = "drive-token", value_name = "FILE", value_hint = usage_rs::ValueHint::FilePath)]
     pub(crate) token: Option<PathBuf>,
 
-    /// Both Drive recognizers: maximum concurrent pages per account.
-    #[usage(long = "drive-concurrency", value_name = "N", default = "4")]
+    /// Both Drive recognizers: maximum concurrent pages per account, including cleanup.
+    #[usage(long = "drive-concurrency", value_name = "N", default = "8")]
     pub(crate) concurrency: usize,
 
     /// Both Drive recognizers: attempts per HTTP operation, including the first.
@@ -258,7 +260,21 @@ pub(crate) struct Drive {
 mod tests {
     use usage_rs::test::{self as harness, Files};
 
-    use super::Cli;
+    use super::{Cli, Command};
+
+    #[test]
+    fn conversion_defaults_match_the_selected_settings() {
+        let words =
+            ["tahweel", "page.png", "--recognizer", "drive-oauth"].map(std::ffi::OsStr::new);
+        let cli = Cli::parse_from(&words).unwrap();
+        let Command::Convert(args) = cli.command else {
+            panic!("expected conversion");
+        };
+        assert_eq!(args.language, "ar");
+        assert_eq!(args.pages.dpi, 200);
+        assert_eq!(args.drive.concurrency, 8);
+        assert_eq!(args.drive.attempts, 5);
+    }
 
     #[test]
     fn completions_offer_recognizers_formats_and_path_kinds() {

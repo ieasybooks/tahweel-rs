@@ -10,8 +10,8 @@ use support::{pdf, pdfium_library};
 
 use async_trait::async_trait;
 use tahweel::{
-    BoxError, ColorMode, DocumentStatus, Error, Event, Format, ImageEncoding, Input, NoProgress,
-    OutputMode, OutputWriter, PageImage, PageOptions, Recognition, Recognizer, Tahweel,
+    BoxError, ColorMode, DocumentStatus, Error, Event, Format, ImageEncoding, ImageFormat, Input,
+    NoProgress, OutputMode, OutputWriter, PageImage, PageOptions, Recognition, Recognizer, Tahweel,
 };
 use tokio::sync::Semaphore;
 use tokio_util::sync::CancellationToken;
@@ -550,37 +550,155 @@ async fn complete_checkpoints_retry_outputs_without_recognizing_again() {
 }
 
 #[tokio::test]
-async fn jpeg_quality_is_reduced_before_page_dimensions() {
+async fn png_and_jpeg_try_the_quality_ladder_before_shrinking() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("noise.png");
-    image(&path, 200, 100);
-    let pixels = image::open(&path).unwrap();
-    let encoded_size = |quality| {
-        let mut bytes = Vec::new();
-        image::codecs::jpeg::JpegEncoder::new_with_quality(&mut bytes, quality)
-            .encode_image(&pixels)
-            .unwrap();
-        bytes.len()
-    };
-    let limit = encoded_size(70);
-    assert!(encoded_size(85) > limit);
-    let fake = Arc::new(Fake {
-        limit: Some(limit),
-        ..Fake::new(1)
-    });
-    let mut options = PageOptions::default();
-    options.color = ColorMode::Color;
-    options.encoding = ImageEncoding::Jpeg { quality: 85 };
-    let report = memory_pipeline(fake.clone())
-        .page_options(options)
-        .build()
-        .run([Input::from(path)], &NoProgress)
-        .await
+    let mut pixels = noise_pixels().into_luma8();
+    for pixel in pixels.pixels_mut() {
+        pixel.0[0] = 64 + pixel.0[0] / 2;
+    }
+    let pixels = image::DynamicImage::from(pixels);
+    pixels.save(&path).unwrap();
+    for (encoding, qualities) in [
+        (ImageEncoding::Png, vec![95, 85, 75, 60]),
+        (ImageEncoding::Jpeg { quality: 90 }, vec![85, 75, 60]),
+        (ImageEncoding::Jpeg { quality: 85 }, vec![75, 60]),
+        (ImageEncoding::Jpeg { quality: 75 }, vec![60]),
+    ] {
+        for quality in qualities {
+            let expected = jpeg_bytes(&pixels, quality);
+            let fake = Arc::new(Fake {
+                limit: Some(expected.len()),
+                ..Fake::new(1)
+            });
+            let mut options = PageOptions::default();
+            options.encoding = encoding;
+            let report = memory_pipeline(fake.clone())
+                .page_options(options)
+                .build()
+                .run([Input::from(path.clone())], &NoProgress)
+                .await
+                .unwrap();
+            assert_eq!(report.failures(), 0, "{encoding:?} to JPEG {quality}");
+            let pages = fake.seen.lock().unwrap();
+            assert_eq!((pages[0].width, pages[0].height), (256, 128));
+            assert_eq!(pages[0].format, ImageFormat::Jpeg);
+            assert_eq!(pages[0].data.as_ref(), expected);
+        }
+    }
+}
+
+fn noise_pixels() -> image::DynamicImage {
+    let mut state = 42_u32;
+    image::GrayImage::from_fn(256, 128, |_, _| {
+        state ^= state << 13;
+        state ^= state >> 17;
+        state ^= state << 5;
+        image::Luma([state.to_le_bytes()[0]])
+    })
+    .into()
+}
+
+fn jpeg_bytes(pixels: &image::DynamicImage, quality: u8) -> Vec<u8> {
+    let mut bytes = Vec::new();
+    image::codecs::jpeg::JpegEncoder::new_with_quality(&mut bytes, quality)
+        .encode(
+            pixels.as_bytes(),
+            pixels.width(),
+            pixels.height(),
+            pixels.color().into(),
+        )
         .unwrap();
-    assert_eq!(report.failures(), 0);
-    let pages = fake.seen.lock().unwrap();
-    assert_eq!((pages[0].width, pages[0].height), (200, 100));
-    assert!(pages[0].data.len() <= limit);
+    bytes
+}
+
+#[tokio::test]
+async fn oversized_pages_shrink_proportionally_from_source_pixels_as_jpeg_75() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("noise.png");
+    let pixels = noise_pixels();
+    pixels.save(&path).unwrap();
+    let smallest = jpeg_bytes(&pixels, 60).len();
+    for (encoding, limit, expected_dimensions) in [
+        (ImageEncoding::Png, smallest - 1, Some((230, 115))),
+        (ImageEncoding::Png, smallest / 4, Some((121, 60))),
+        // Starting below the ladder must shrink, not increase quality at full size.
+        // JPEG 75 still exceeds this limit after the first 0.90 resize.
+        (
+            ImageEncoding::Jpeg { quality: 1 },
+            jpeg_bytes(&pixels, 1).len() - 1,
+            None,
+        ),
+    ] {
+        let fake = Arc::new(Fake {
+            limit: Some(limit),
+            ..Fake::new(1)
+        });
+        let mut options = PageOptions::default();
+        options.encoding = encoding;
+        let report = memory_pipeline(fake.clone())
+            .page_options(options)
+            .build()
+            .run([Input::from(path.clone())], &NoProgress)
+            .await
+            .unwrap();
+        assert_eq!(report.failures(), 0);
+        let pages = fake.seen.lock().unwrap();
+        let page = &pages[0];
+        assert!(page.data.len() <= limit);
+        assert_eq!(page.format, ImageFormat::Jpeg);
+        if let Some(dimensions) = expected_dimensions {
+            assert_eq!((page.width, page.height), dimensions);
+        } else {
+            assert!(page.width < 230 && page.height < 115);
+        }
+        assert!((i64::from(page.width) - 2 * i64::from(page.height)).abs() <= 1);
+        let expected = pixels.resize_exact(
+            page.width,
+            page.height,
+            image::imageops::FilterType::Triangle,
+        );
+        assert_eq!(page.data.as_ref(), jpeg_bytes(&expected, 75));
+    }
+}
+
+#[tokio::test]
+async fn default_image_settings_cap_the_long_edge_without_upscaling() {
+    let defaults = PageOptions::default();
+    assert_eq!(defaults.dpi, 200);
+    assert_eq!(defaults.color, ColorMode::Grayscale);
+    assert_eq!(defaults.encoding, ImageEncoding::Png);
+    assert_eq!(defaults.max_long_edge, Some(2_339));
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("page.png");
+    for (dimensions, expected, cap) in [
+        ((4_678, 2_338), (2_339, 1_169), defaults.max_long_edge),
+        ((2_338, 4_678), (1_169, 2_339), defaults.max_long_edge),
+        ((2_339, 500), (2_339, 500), defaults.max_long_edge),
+        ((320, 160), (320, 160), defaults.max_long_edge),
+        ((2_400, 100), (2_400, 100), None),
+    ] {
+        image::RgbImage::from_pixel(dimensions.0, dimensions.1, image::Rgb([80, 100, 120]))
+            .save(&path)
+            .unwrap();
+        let fake = Arc::new(Fake::new(1));
+        let mut options = defaults.clone();
+        options.max_long_edge = cap;
+        let report = memory_pipeline(fake.clone())
+            .page_options(options)
+            .build()
+            .run([Input::from(path.clone())], &NoProgress)
+            .await
+            .unwrap();
+        assert_eq!(report.failures(), 0);
+        let pages = fake.seen.lock().unwrap();
+        assert_eq!((pages[0].width, pages[0].height), expected);
+        assert_eq!(pages[0].format, ImageFormat::Png);
+        assert_eq!(
+            image::load_from_memory(&pages[0].data).unwrap().color(),
+            image::ColorType::L8
+        );
+    }
 }
 
 #[tokio::test]

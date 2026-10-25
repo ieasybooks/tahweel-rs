@@ -1,8 +1,9 @@
 use std::path::Path;
 
 use image::codecs::jpeg::JpegEncoder;
+use image::codecs::png::{CompressionType, FilterType as PngFilterType, PngEncoder};
 use image::imageops::FilterType;
-use image::{DynamicImage, ImageDecoder, ImageReader};
+use image::{DynamicImage, ImageDecoder, ImageEncoder, ImageReader};
 
 use crate::{Error, ImageFormat, PageImage, Result};
 
@@ -25,7 +26,7 @@ pub enum ImageEncoding {
         /// The initial quality, before any reduction needed to meet the recognizer's limit.
         quality: u8,
     },
-    /// Lossless PNG.
+    /// Lossless PNG with DEFLATE compression level 6.
     Png,
 }
 
@@ -33,15 +34,16 @@ pub enum ImageEncoding {
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 #[non_exhaustive]
 pub struct PageOptions {
-    /// PDF rendering resolution, in dots per inch.
+    /// PDF rendering resolution, in dots per inch. Defaults to 200.
     /// Bitmaps exceeding the image decoder's default allocation limit (512 MiB) are rejected.
     pub dpi: u32,
-    /// Whether to retain color.
+    /// Whether to retain color. Defaults to grayscale.
     pub color: ColorMode,
-    /// Output image encoding.
+    /// Output image encoding. Defaults to lossless PNG.
+    /// Oversized pages fall back to JPEG before reducing their dimensions.
     pub encoding: ImageEncoding,
     /// Maximum long edge for image inputs, in pixels. `None` keeps their original resolution.
-    /// Images are never enlarged. PDF resolution is controlled by `dpi` instead.
+    /// Defaults to 2,339 pixels. Images are never enlarged. PDF resolution is controlled by `dpi` instead.
     pub max_long_edge: Option<u32>,
 }
 
@@ -50,8 +52,8 @@ impl Default for PageOptions {
         Self {
             dpi: 200,
             color: ColorMode::Grayscale,
-            encoding: ImageEncoding::Jpeg { quality: 85 },
-            max_long_edge: None,
+            encoding: ImageEncoding::Png,
+            max_long_edge: Some(2_339),
         }
     }
 }
@@ -115,8 +117,7 @@ pub(crate) fn encode(
         ColorMode::Grayscale => DynamicImage::ImageLuma8(image.into_luma8()),
         ColorMode::Color => DynamicImage::ImageRgb8(image.into_rgb8()),
     };
-    let mut encoding = options.encoding;
-    let page = encode_once(&image, encoding)?;
+    let page = encode_once(&image, options.encoding)?;
     let Some(limit) = limit else {
         return Ok(page);
     };
@@ -125,28 +126,38 @@ pub(crate) fn encode(
     }
     let mut bytes = page.data.len();
     drop(page);
-    // Try a few fixed quality levels before reducing the page's dimensions.
-    if let ImageEncoding::Jpeg { quality } = encoding {
-        for lower in [70, 55, 40] {
-            if lower >= quality {
-                continue;
-            }
-            encoding = ImageEncoding::Jpeg { quality: lower };
-            let page = encode_once(&image, encoding)?;
-            if page.data.len() <= limit {
-                return Ok(page);
-            }
-            bytes = page.data.len();
+    // Preserve dimensions first; never raise a caller's starting JPEG quality.
+    for quality in [95, 85, 75, 60] {
+        if let ImageEncoding::Jpeg { quality: initial } = options.encoding
+            && quality >= initial
+        {
+            continue;
         }
+        let page = encode_once(&image, ImageEncoding::Jpeg { quality })?;
+        if page.data.len() <= limit {
+            return Ok(page);
+        }
+        bytes = page.data.len();
     }
-    for _ in 0..6 {
-        let width = (image.width() / 4 * 3 + image.width() % 4 * 3 / 4).max(1);
-        let height = (image.height() / 4 * 3 + image.height() % 4 * 3 / 4).max(1);
-        if width == image.width() && height == image.height() {
-            break;
-        }
-        image = image.resize_exact(width, height, FilterType::Triangle);
-        let page = encode_once(&image, encoding)?;
+    shrink_to_limit(&image, bytes, limit)
+}
+
+#[allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    reason = "byte lengths need only an approximate ratio; scaled dimensions are positive and at most the original u32 dimensions"
+)]
+fn shrink_to_limit(image: &DynamicImage, mut bytes: usize, limit: usize) -> Result<PageImage> {
+    let (mut width, mut height) = (image.width(), image.height());
+    let mut scale = 1.0;
+    while width > 1 || height > 1 {
+        scale *= (0.95 * (limit as f64 / bytes as f64).sqrt()).min(0.90);
+        width = ((f64::from(image.width()) * scale) as u32).max(1);
+        height = ((f64::from(image.height()) * scale) as u32).max(1);
+        // Always sample the prepared source, preserving its aspect ratio across steps.
+        let resized = image.resize_exact(width, height, FilterType::Triangle);
+        let page = encode_once(&resized, ImageEncoding::Jpeg { quality: 75 })?;
         if page.data.len() <= limit {
             return Ok(page);
         }
@@ -160,7 +171,12 @@ fn encode_once(image: &DynamicImage, encoding: ImageEncoding) -> Result<PageImag
     let format = match encoding {
         ImageEncoding::Jpeg { quality } => {
             JpegEncoder::new_with_quality(&mut data, quality)
-                .encode_image(image)
+                .encode(
+                    image.as_bytes(),
+                    image.width(),
+                    image.height(),
+                    image.color().into(),
+                )
                 .map_err(|source| Error::Image {
                     context: "encoding JPEG page".into(),
                     source,
@@ -168,15 +184,21 @@ fn encode_once(image: &DynamicImage, encoding: ImageEncoding) -> Result<PageImag
             ImageFormat::Jpeg
         }
         ImageEncoding::Png => {
-            image
-                .write_to(
-                    &mut std::io::Cursor::new(&mut data),
-                    image::ImageFormat::Png,
-                )
-                .map_err(|source| Error::Image {
-                    context: "encoding PNG page".into(),
-                    source,
-                })?;
+            PngEncoder::new_with_quality(
+                &mut data,
+                CompressionType::Level(6),
+                PngFilterType::Adaptive,
+            )
+            .write_image(
+                image.as_bytes(),
+                image.width(),
+                image.height(),
+                image.color().into(),
+            )
+            .map_err(|source| Error::Image {
+                context: "encoding PNG page".into(),
+                source,
+            })?;
             ImageFormat::Png
         }
     };

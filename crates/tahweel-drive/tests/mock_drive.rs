@@ -59,7 +59,7 @@ async fn uploads_related_multipart_exports_cleans_and_deletes() {
     let recognizer = DriveRecognizer::new(config(&server, &["one@example.test"]))
         .await
         .unwrap();
-    assert_eq!(recognizer.max_in_flight(), 4);
+    assert_eq!(recognizer.max_in_flight(), 8);
     assert_eq!(recognizer.max_image_bytes(), Some(2_000_000));
     let image = page();
     assert_eq!(
