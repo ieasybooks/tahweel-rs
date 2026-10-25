@@ -30,19 +30,37 @@ impl fmt::Debug for ServiceAccountKey {
 impl ServiceAccountKey {
     /// Reads and validates a service-account JSON file. Does not make network requests.
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self, DriveError> {
-        #[derive(Deserialize)]
-        struct KeyFile {
-            r#type: String,
-            client_email: String,
-            private_key: String,
-        }
         let bytes = fs::read(path.as_ref()).map_err(|err| {
             DriveError::io(
                 format!("could not read key file {}", path.as_ref().display()),
                 err,
             )
         })?;
-        let file: KeyFile = serde_json::from_slice(&bytes).map_err(|_| {
+        let json = std::str::from_utf8(&bytes)
+            .map_err(|_| DriveError::InvalidKey("expected UTF-8 JSON"))?;
+        Self::from_json(json)
+    }
+
+    /// Parses and validates service-account JSON text without making network requests.
+    /// Requires `type`, `client_email` and `private_key`; other fields are ignored.
+    ///
+    /// ```no_run
+    /// use tahweel_drive::ServiceAccountKey;
+    ///
+    /// # fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let json = std::env::var("DRIVE_SERVICE_ACCOUNT")?;
+    /// let key = ServiceAccountKey::from_json(&json)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn from_json(json: &str) -> Result<Self, DriveError> {
+        #[derive(Deserialize)]
+        struct KeyFile {
+            r#type: String,
+            client_email: String,
+            private_key: String,
+        }
+        let file: KeyFile = serde_json::from_str(json).map_err(|_| {
             DriveError::InvalidKey("expected type, client_email and private_key fields")
         })?;
         if file.r#type != "service_account" || file.client_email.trim().is_empty() {

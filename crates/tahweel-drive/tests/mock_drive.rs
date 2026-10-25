@@ -167,6 +167,59 @@ async fn service_account_assertion_has_correct_signature_claims_and_scope() {
     );
 }
 
+#[test]
+fn service_account_json_and_file_load_the_same_key_and_ignore_extra_fields() {
+    let json = key_json("one@example.test");
+    let mut document: serde_json::Value = serde_json::from_str(&json).unwrap();
+    document["project_id"] = serde_json::json!("unused-project");
+    document["extra"] = serde_json::json!({"ignored": true});
+    let from_json = ServiceAccountKey::from_json(&document.to_string()).unwrap();
+    let file = tempfile::NamedTempFile::new().unwrap();
+    std::fs::write(file.path(), &json).unwrap();
+    let from_file = ServiceAccountKey::from_file(file.path()).unwrap();
+    assert_eq!(from_json.client_email(), "one@example.test");
+    assert_eq!(from_json.client_email(), from_file.client_email());
+    for key in [from_json, from_file] {
+        let debug = format!("{key:?}");
+        assert!(debug.contains("[redacted]"));
+        assert!(!debug.contains(document["private_key"].as_str().unwrap()));
+        assert!(!debug.contains("PRIVATE KEY"));
+    }
+}
+
+#[test]
+fn service_account_json_rejects_invalid_input_without_echoing_it() {
+    let key_text = "key-text-that-must-not-appear-in-errors";
+    for json in [
+        "{invalid-json".into(),
+        "null".into(),
+        "{}".into(),
+        serde_json::json!({"type": "service_account", "client_email": "one"}).to_string(),
+        serde_json::json!({"type": "service_account", "private_key": key_text}).to_string(),
+        serde_json::json!({"client_email": "one", "private_key": key_text}).to_string(),
+        serde_json::json!({"type": "other", "client_email": "one", "private_key": key_text}).to_string(),
+        serde_json::json!({"type": "service_account", "client_email": " ", "private_key": key_text}).to_string(),
+        serde_json::json!({"type": "service_account", "client_email": 42, "private_key": key_text}).to_string(),
+        serde_json::json!({"type": "service_account", "client_email": "one", "private_key": key_text}).to_string(),
+        serde_json::json!({"type": "service_account", "client_email": "one", "private_key": ""}).to_string(),
+    ] {
+        let error = ServiceAccountKey::from_json(&json).unwrap_err();
+        assert!(matches!(error, DriveError::InvalidKey(_) | DriveError::Signing(_)));
+        assert!(!format!("{error:?}").contains(key_text));
+        assert!(!error.to_string().contains(key_text));
+        let file = tempfile::NamedTempFile::new().unwrap();
+        std::fs::write(file.path(), &json).unwrap();
+        let file_error = ServiceAccountKey::from_file(file.path()).unwrap_err();
+        assert_eq!(std::mem::discriminant(&error), std::mem::discriminant(&file_error));
+    }
+    let file = tempfile::NamedTempFile::new().unwrap();
+    std::fs::write(file.path(), [0xff]).unwrap();
+    assert!(matches!(
+        ServiceAccountKey::from_file(file.path()),
+        Err(DriveError::InvalidKey(_))
+    ));
+}
+
 #[tokio::test]
 async fn retry_classes_and_rate_limit_budget() {
     for (status, reason, rate_limit) in [

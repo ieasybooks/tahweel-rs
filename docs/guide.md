@@ -261,6 +261,8 @@ async fn main() -> Result<(), BoxError> {
 }
 ```
 
+For a server that already has the service-account JSON text in memory, use `ServiceAccountKey::from_json(&json)` instead of reading a file. It validates the same required `type`, `client_email` and `private_key` fields as `from_file`, and ignores other fields. The caller loads the text from its chosen configuration source.
+
 `run` requires a Tokio runtime. Its report contains documents in input order, with each converted document's `pages` in page order. Ordinary input and document failures are in `report.failed_inputs` and `DocumentStatus::Failed`; check `report.failures()` as well as the returned `Result`. `report.cancelled` records graceful cancellation. Errors affecting the entire run are returned after active recognition calls have finished. Keep progress callbacks short because they run on the collecting task; use `NoProgress` when no callback is needed.
 
 The library defaults to all three formats beside each input. An empty format list, as above, writes no final output files. Select formats with `OutputWriter::new().formats([tahweel::Format::Txt])`, and choose destinations with `OutputMode::TreeToTree(dir)` or `OutputMode::Flat(dir)`. Use `.recursive(true)` for subfolders. Library checkpoints are opt-in: set `.checkpoints(directory)` and a `.checkpoint_label("drive-service-account:ar")` identifying your recognition settings, and change the label when those settings change.

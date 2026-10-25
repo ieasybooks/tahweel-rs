@@ -7,7 +7,8 @@ use crate::{DriveError, OAuthToken, ServiceAccountKey};
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum DriveAuth {
-    /// One lane per service account. Load keys with [`ServiceAccountKey::from_file`].
+    /// One lane per service account. Load keys with [`ServiceAccountKey::from_file`]
+    /// or [`ServiceAccountKey::from_json`].
     ServiceAccounts(Vec<ServiceAccountKey>),
     /// One lane for the user signed in through the browser.
     OAuth(OAuthToken),
