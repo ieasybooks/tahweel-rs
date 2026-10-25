@@ -19,6 +19,10 @@ pub(crate) fn key_pair() -> &'static KeyPair {
 }
 
 pub(crate) fn key(account: &str) -> ServiceAccountKey {
+    ServiceAccountKey::from_json(&key_json(account)).unwrap()
+}
+
+pub(crate) fn key_json(account: &str) -> String {
     let der = key_pair().as_der().unwrap();
     let pem = format!(
         "-----BEGIN PRIVATE KEY-----\n{}\n-----END PRIVATE KEY-----\n",
@@ -26,9 +30,7 @@ pub(crate) fn key(account: &str) -> ServiceAccountKey {
     );
     let json =
         serde_json::json!({"type": "service_account", "client_email": account, "private_key": pem});
-    let file = tempfile::NamedTempFile::new().unwrap();
-    std::fs::write(file.path(), serde_json::to_vec(&json).unwrap()).unwrap();
-    ServiceAccountKey::from_file(file.path()).unwrap()
+    json.to_string()
 }
 
 pub(crate) fn config(server: &MockServer, accounts: &[&str]) -> DriveConfig {
