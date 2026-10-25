@@ -36,6 +36,8 @@ repository = "https://github.com/ieasybooks/tahweel-rs"
 keywords = ["ocr", "pdf", "arabic", "docx", "google-drive"]
 
 [workspace.dependencies]
+async-trait = "0.1.92"
+thiserror = "2.0.21"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

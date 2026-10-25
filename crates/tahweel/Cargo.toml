@@ -11,6 +11,8 @@ keywords.workspace = true
 categories = ["text-processing", "multimedia::images"]
 
 [dependencies]
+async-trait.workspace = true
+thiserror.workspace = true
 
 [lints]
 workspace = true
