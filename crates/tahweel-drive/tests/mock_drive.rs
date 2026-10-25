@@ -103,6 +103,35 @@ async fn uploads_related_multipart_exports_cleans_and_deletes() {
 }
 
 #[tokio::test]
+async fn uploads_without_a_language_hint_when_drive_detects_the_language() {
+    let server = MockServer::start().await;
+    no_leftovers(&server).await;
+    tokens(&server).await;
+    Mock::given(method("POST"))
+        .and(path("/upload/drive/v3/files"))
+        .and(query_param("uploadType", "multipart"))
+        .and(query_param("fields", "id"))
+        .and(|request: &Request| {
+            request
+                .url
+                .query_pairs()
+                .all(|(key, _)| key != "ocrLanguage")
+        })
+        .respond_with(uploaded())
+        .expect(1)
+        .mount(&server)
+        .await;
+    export_and_delete(&server).await;
+    let mut cfg = config(&server, &["one@example.test"]);
+    cfg.language = None;
+    let recognizer = DriveRecognizer::new(cfg).await.unwrap();
+    assert_eq!(
+        recognizer.recognize(&page()).await.unwrap().text,
+        "نص\nعربي"
+    );
+}
+
+#[tokio::test]
 async fn service_account_assertion_has_correct_signature_claims_and_scope() {
     let server = MockServer::start().await;
     no_leftovers(&server).await;
@@ -626,13 +655,14 @@ async fn validates_config_and_rejects_oversized_images_before_upload() {
             .await
             .is_err()
     );
-    for invalid in 0..4 {
+    for invalid in 0..5 {
         let mut cfg = config(&server, &["one"]);
         match invalid {
             0 => cfg.max_attempts = 0,
             1 => cfg.concurrency_per_account = 0,
             2 => cfg.token_url = "not a url".into(),
-            _ => cfg.request_timeout = Duration::ZERO,
+            3 => cfg.request_timeout = Duration::ZERO,
+            _ => cfg.language = Some(" ".into()),
         }
         assert!(DriveRecognizer::new(cfg).await.is_err());
     }

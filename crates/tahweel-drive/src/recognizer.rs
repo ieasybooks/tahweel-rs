@@ -240,19 +240,18 @@ impl Inner {
         struct Uploaded {
             id: String,
         }
-        let request = self
+        let mut request = self
             .client
             .post(format!(
                 "{}/drive/v3/files",
                 self.config.upload_base.trim_end_matches('/')
             ))
-            .query(&[
-                ("uploadType", "multipart"),
-                ("ocrLanguage", self.config.language.as_str()),
-                ("fields", "id"),
-            ])
+            .query(&[("uploadType", "multipart"), ("fields", "id")])
             .header(reqwest::header::CONTENT_TYPE, content_type)
             .body(body);
+        if let Some(language) = &self.config.language {
+            request = request.query(&[("ocrLanguage", language)]);
+        }
         let Some(bytes) = self.request(account, request, RequestKind::Upload).await? else {
             return Ok(None);
         };

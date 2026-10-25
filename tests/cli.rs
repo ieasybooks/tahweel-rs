@@ -622,6 +622,30 @@ async fn presets_environment_keys_negations_and_default_output_layout_work() {
 }
 
 #[tokio::test]
+async fn auto_language_omits_the_upload_hint() {
+    let dir = tempfile::tempdir().unwrap();
+    write_image(&dir.path().join("page.png"));
+    write_key(&dir.path().join("key.json"));
+    let server = mock_drive().await;
+    let mut cmd = service_command(dir.path(), &server);
+    cmd.args(["page.png", "-l", "auto"]);
+    success(&run(cmd).await);
+    let requests = server.received_requests().await.unwrap();
+    let upload = requests
+        .iter()
+        .find(|r| r.url.path() == "/upload/drive/v3/files")
+        .unwrap();
+    assert!(
+        upload
+            .url
+            .query_pairs()
+            .all(|(key, _)| key != "ocrLanguage")
+    );
+    assert_outputs(dir.path(), "page", 1, "\n\nPAGE_SEPARATOR\n\n");
+    assert_round_trips(&server, 1).await;
+}
+
+#[tokio::test]
 async fn repeated_and_comma_separated_keys_override_environment() {
     let dir = tempfile::tempdir().unwrap();
     write_image(&dir.path().join("page.png"));
@@ -801,7 +825,7 @@ async fn checkpoints_resume_completed_pages_and_separate_languages() {
     let Some(pdfium) = fixtures::pdfium_library() else {
         return;
     };
-    for language in ["ar", "en"] {
+    for language in ["ar", "en", "auto"] {
         let dir = tempfile::tempdir().unwrap();
         let cache = if cfg!(windows) {
             dir.path().join("AppData").join("Local")
@@ -842,7 +866,7 @@ async fn checkpoints_resume_completed_pages_and_separate_languages() {
         success(&run(invoke(language)).await);
         assert_outputs(dir.path(), "book", 2, "\n\nPAGE_SEPARATOR\n\n");
         assert_round_trips(&server, if language == "ar" { 3 } else { 4 }).await;
-        if language == "en" {
+        if language != "ar" {
             success(&run(invoke("ar")).await);
         }
         assert_eq!(fs::read_dir(&checkpoints).unwrap().count(), 0);
