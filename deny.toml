@@ -10,7 +10,8 @@ ignore = []
 # Every dependency's license must be on this list. Add a license only after checking it is
 # compatible with distributing tahweel under MIT.
 allow = ["Apache-2.0", "BSD-3-Clause", "CDLA-Permissive-2.0", "ISC", "MIT", "MPL-2.0", "Unicode-3.0", "Zlib"]
-# MPL-2.0 is used by unmodified option-ext (via dirs); the larger work remains MIT.
+# MPL-2.0 covers unmodified option-ext (via dirs), CDLA-Permissive-2.0 covers certificate data
+# and Zlib covers zlib-rs; the larger work remains MIT. Keep about.toml's list the same.
 confidence-threshold = 0.8
 unused-allowed-license = "allow"
 

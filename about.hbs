@@ -1,0 +1,22 @@
+Third-party Rust dependency licenses
+
+Tahweel's own code is MIT licensed. Dependency licenses remain unchanged.
+This file covers the workspace dependency graph, including platform-specific crates.
+PDFium's notices are supplied separately in PDFIUM-LICENSE and licenses/.
+
+{{#each licenses}}
+===============================================================================
+{{name}} ({{id}})
+
+Used by:
+{{#each used_by}}
+- {{crate.name}} {{crate.version}}
+  Source: https://crates.io/api/v1/crates/{{crate.name}}/{{crate.version}}/download
+{{#if crate.repository}}
+  Repository: {{{crate.repository}}}
+{{/if}}
+{{/each}}
+
+{{{text}}}
+
+{{/each}}

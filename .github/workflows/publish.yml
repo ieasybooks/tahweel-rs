@@ -1,0 +1,78 @@
+name: Publish to crates.io
+
+# Manual runs check packages only, unless publishing is enabled on a release tag.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish this release tag to crates.io
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Check the packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Check the release tag matches the crate version
+        if: github.event_name == 'release' || inputs.publish
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(cargo metadata --no-deps --locked --format-version 1 \
+            | jq -r '.packages[] | select(.name == "tahweel-cli") | .version')
+          if [ "$GITHUB_REF_TYPE" != tag ] || [ "$TAG" != "v$version" ]; then
+            echo "::error::Publishing requires the tag v$version"
+            exit 1
+          fi
+      # Verifies each packaged crate, including unpublished workspace dependencies.
+      - run: cargo package --workspace --locked
+
+  publish:
+    name: Publish
+    needs: check
+    if: github.event_name == 'release' || inputs.publish
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      # Trusted publishing requires an existing crate. Remove the token once all three
+      # crates have been published and their trusted publishers configured.
+      HAS_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install
+      - name: Authenticate with crates.io
+        id: auth
+        if: env.HAS_TOKEN != 'true'
+        uses: rust-lang/crates-io-auth-action@v1
+      - name: Publish the crates
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token || secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          version=$(cargo metadata --no-deps --locked --format-version 1 \
+            | jq -r '.packages[] | select(.name == "tahweel-cli") | .version')
+          # Dependencies first; skip versions already published so failed runs can be retried.
+          for crate in tahweel tahweel-drive tahweel-cli; do
+            status=$(curl --silent --show-error --retry 3 --output /dev/null --write-out '%{http_code}' \
+              --user-agent "tahweel-rs release ($GITHUB_REPOSITORY)" \
+              "https://crates.io/api/v1/crates/$crate/$version")
+            case "$status" in
+              200) echo "$crate $version is already on crates.io" ;;
+              404) cargo publish --locked --package "$crate" ;;
+              *) echo "::error::Checking $crate $version returned HTTP $status"; exit 1 ;;
+            esac
+          done

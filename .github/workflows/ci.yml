@@ -20,7 +20,7 @@ jobs:
       # Installs the toolchain pinned in rust-toolchain.toml, with rustfmt and clippy.
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      - name: Install cargo-deny, typos and the Usage CLI
+      - name: Install development tools
         uses: jdx/mise-action@v5.2.3
       - name: Check workspace versions and release-please dependency names
         run: |
@@ -39,6 +39,10 @@ jobs:
         run: python .github/scripts/pdfium.py
       - run: cargo test --workspace --locked
       - run: cargo deny --locked check
+      # Release archives include these notices; fail here when a new license isn't accepted.
+      - name: Check dependency notices
+        run: cargo about generate --locked --all-features --workspace --fail about.hbs --output-file "$RUNNER_TEMP/THIRD-PARTY-LICENSES"
+      - run: actionlint
       - run: typos
       - name: Check generated CLI reference
         run: |
