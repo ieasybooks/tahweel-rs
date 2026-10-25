@@ -89,13 +89,18 @@ impl DriveError {
 
     /// Whether a further attempt of the same HTTP operation may succeed.
     pub fn is_retryable(&self) -> bool {
-        match self {
-            Self::Request(_) => true,
-            Self::Status { status, .. } => {
-                matches!(status, 408 | 429 | 500..=599) || self.is_rate_limited()
-            }
-            _ => false,
-        }
+        self.is_overloaded() || self.is_rate_limited()
+    }
+
+    pub(crate) fn is_overloaded(&self) -> bool {
+        matches!(
+            self,
+            Self::Request(_)
+                | Self::Status {
+                    status: 408 | 500..=599,
+                    ..
+                }
+        )
     }
 
     /// Server-requested retry delay, including HTTP-date `Retry-After` values.

@@ -18,6 +18,7 @@ async fn initializes_and_cleans_up_leftovers() {
 #[tokio::test]
 #[ignore = "requires TAHWEEL_TEST_SERVICE_ACCOUNT and makes real Drive requests"]
 async fn recognizes_arabic_fixture() {
+    let _subscriber = tracing::subscriber::set_default(tracing_subscriber::fmt().finish());
     let path = std::env::var_os("TAHWEEL_TEST_SERVICE_ACCOUNT")
         .expect("set TAHWEEL_TEST_SERVICE_ACCOUNT to a key file");
     let key = ServiceAccountKey::from_file(path).unwrap();

@@ -176,6 +176,7 @@ impl Inner {
             {
                 Ok(token) => token,
                 Err(error) => {
+                    self.scheduler.failed(account, &error);
                     if remember_rejection && error.is_run_level() {
                         self.scheduler.reject_credentials();
                     }
@@ -192,9 +193,13 @@ impl Inner {
             )
             .await;
             let error = match result {
-                Ok(bytes) => return Ok(Some(bytes)),
+                Ok(bytes) => {
+                    self.scheduler.succeeded(account);
+                    return Ok(Some(bytes));
+                }
                 Err(error) => error,
             };
+            self.scheduler.failed(account, &error);
             if error.is_unauthorized() {
                 if refreshed {
                     if remember_rejection {
@@ -211,6 +216,7 @@ impl Inner {
                     )
                     .await
                 {
+                    self.scheduler.failed(account, &error);
                     if remember_rejection && error.is_run_level() {
                         self.scheduler.reject_credentials();
                     }
