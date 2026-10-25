@@ -109,7 +109,7 @@ pub(crate) struct Args {
     #[usage(long, value_enum, value_name = "BACKEND")]
     pub(crate) recognizer: Recognizer,
 
-    /// OCR language code, such as ar or en.
+    /// OCR language code, such as ar or en; auto lets Drive detect the language.
     #[usage(short = 'l', long, value_name = "LANG", default = "ar")]
     pub(crate) language: String,
 

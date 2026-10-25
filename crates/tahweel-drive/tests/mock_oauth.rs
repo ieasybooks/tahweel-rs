@@ -372,7 +372,7 @@ async fn expired_saved_token_refreshes_at_startup_and_keeps_rotated_refresh_toke
     .await
     .unwrap();
     assert_eq!(r.config().concurrency_per_account, 8);
-    assert_eq!(r.config().language, "ar");
+    assert_eq!(r.config().language.as_deref(), Some("ar"));
     assert_eq!(r.config().max_image_bytes, 2_000_000);
     assert_eq!(r.config().max_attempts, 5);
     assert_eq!(r.config().request_timeout, Duration::from_secs(180));

@@ -46,7 +46,7 @@ enum Credentials {
 /// Checked Drive settings, before credentials or network requests are loaded.
 pub(crate) struct Drive {
     credentials: Credentials,
-    language: String,
+    language: Option<String>,
     concurrency: usize,
     attempts: u32,
     test_url: Option<String>,
@@ -153,7 +153,7 @@ impl Run {
             inputs: args.inputs.iter().map(Input::from).collect(),
             drive: Drive {
                 credentials,
-                language: args.language.clone(),
+                language: (args.language != "auto").then(|| args.language.clone()),
                 concurrency: args.drive.concurrency,
                 attempts: args.drive.attempts,
                 test_url,

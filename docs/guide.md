@@ -49,12 +49,13 @@ The default is eight page operations per account, including upload, export and d
 
 ## Inputs and outputs
 
-Inputs can be PDF, JPG/JPEG and PNG files, or folders containing them. Each image is one document with one page. Every PDF page is rendered and recognized, including pages that already contain selectable text; tahweel does not extract the existing text layer. Arabic is the default OCR language (`-l ar`); use `-l en` or another language code to change the hint sent to Drive.
+Inputs can be PDF, JPG/JPEG and PNG files, or folders containing them. Each image is one document with one page. Every PDF page is rendered and recognized, including pages that already contain selectable text; tahweel does not extract the existing text layer. Arabic is the default OCR language (`-l ar`); use `-l en` or another language code to change the hint sent to Drive. Use `-l auto` to omit the hint and let Drive detect the language.
 
 ```sh
 tahweel book.pdf cover.jpg page.png --recognizer drive-oauth
 tahweel books/ --recognizer drive-oauth -r -o text -f txt,docx
 tahweel book.pdf --recognizer drive-oauth -l en -f json
+tahweel book.pdf --recognizer drive-oauth -l auto
 ```
 
 Folders are scanned one level deep by default. `-r` / `--recursive` includes subfolders. Folder discovery recognizes extensions without regard to case, skips directory symlinks, and skips an output directory nested inside the input tree during recursive traversal. Multiple input files and folders can be supplied in one command.
@@ -264,7 +265,7 @@ async fn main() -> Result<(), BoxError> {
 
 The library defaults to all three formats beside each input. An empty format list, as above, writes no final output files. Select formats with `OutputWriter::new().formats([tahweel::Format::Txt])`, and choose destinations with `OutputMode::TreeToTree(dir)` or `OutputMode::Flat(dir)`. Use `.recursive(true)` for subfolders. Library checkpoints are opt-in: set `.checkpoints(directory)` and a `.checkpoint_label("drive-service-account:ar")` identifying your recognition settings, and change the label when those settings change.
 
-For PDF inputs, use `.pdfium_library(path)` or the executable-adjacent/system library search. The library itself does not read `TAHWEEL_PDFIUM` or credential environment variables. `DriveConfig` controls language and account concurrency; `PageOptions`, passed to `.page_options(options)`, controls rendering and encoding. For OAuth in an application, see the [Drive library documentation](https://docs.rs/tahweel-drive): the caller presents the sign-in URL, and the library handles the loopback callback and saved token refresh.
+For PDF inputs, use `.pdfium_library(path)` or the executable-adjacent/system library search. The library itself does not read `TAHWEEL_PDFIUM` or credential environment variables. `DriveConfig` controls language and account concurrency: `language` defaults to `Some("ar".into())`; set it to `None` to let Drive detect the language, and use a distinct checkpoint label such as `"drive-service-account:auto"`. `PageOptions`, passed to `.page_options(options)`, controls rendering and encoding. For OAuth in an application, see the [Drive library documentation](https://docs.rs/tahweel-drive): the caller presents the sign-in URL, and the library handles the loopback callback and saved token refresh.
 
 ### Another OCR backend
 
@@ -323,7 +324,7 @@ An ordinary recognition error fails its document. Return a boxed `tahweel::Error
 - DOCX uses Ruby's line merging and content-based alignment, with right-to-left marking added for Arabic. Python's Arabic-Indic digit conversion and `--docx-remove-newlines` option are not carried over. Text stays at Ruby's 10 points.
 - A failed page fails its document and is reported; it is not silently omitted or replaced with blank text. Python already failed a document on an OCR error, but returned a successful process exit code. Ruby could omit failed page renders and silently swallow file failures. This CLI returns code 3 when some inputs or documents fail, and saves completed pages for resuming.
 - PDFium replaces Poppler. The defaults are grayscale PNG at 200 DPI, compared with Python's color JPEG at 200 DPI and Ruby's PNG at 150 DPI. Standalone images are capped at a 2,339-pixel long edge, and prepared page images at 2 MB with a JPEG fallback.
-- The OCR language is sent explicitly (`ocrLanguage=ar` by default); both originals let Drive detect it. Page concurrency is bounded per account across the run. Temporary Drive documents are cleaned up after export failures too, with a startup pass for tagged leftovers older than an hour; the originals had no such startup cleanup.
+- The OCR language defaults to an explicit hint (`ocrLanguage=ar`); use `-l auto` to let Drive detect it as both originals did. Page concurrency is bounded per account across the run. Temporary Drive documents are cleaned up after export failures too, with a startup pass for tagged leftovers older than an hour; the originals had no such startup cleanup.
 
 ## Development
 

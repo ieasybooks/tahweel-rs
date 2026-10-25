@@ -51,7 +51,7 @@ Inputs can be PDF, JPEG and PNG files, or folders containing them. Every page is
 - **`--recognizer <BACKEND>`** — Recognizer to use for the entire run. Required; no automatic switching.
 
   **Choices:** `drive-oauth`, `drive-service-account`
-- **`-l --language <LANG>`** — OCR language code, such as ar or en.
+- **`-l --language <LANG>`** — OCR language code, such as ar or en; auto lets Drive detect the language.
 
   **Default:** `ar`
 - **`-r --recursive`** — Include files in subdirectories. Directory symlinks are not followed.

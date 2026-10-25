@@ -19,8 +19,8 @@ pub enum DriveAuth {
 pub struct DriveConfig {
     /// Credentials; their `Debug` implementations omit key and token contents.
     pub auth: DriveAuth,
-    /// OCR language, e.g. `ar`.
-    pub language: String,
+    /// OCR language hint, e.g. `Some("ar".into())`; `None` lets Drive detect it.
+    pub language: Option<String>,
     /// Maximum concurrent page operations per account, including cleanup. Defaults to 8.
     pub concurrency_per_account: usize,
     /// Attempts per HTTP operation, including the first; rate limits have a separate budget.
@@ -46,7 +46,7 @@ impl DriveConfig {
     pub fn new(auth: DriveAuth) -> Self {
         Self {
             auth,
-            language: "ar".into(),
+            language: Some("ar".into()),
             concurrency_per_account: 8,
             max_attempts: DEFAULT_MAX_ATTEMPTS,
             max_image_bytes: 2_000_000,
@@ -80,7 +80,10 @@ impl DriveConfig {
         if accounts.checked_mul(self.concurrency_per_account).is_none() {
             return Err(DriveError::Config("total concurrency is too large".into()));
         }
-        if self.language.trim().is_empty()
+        if self
+            .language
+            .as_ref()
+            .is_some_and(|code| code.trim().is_empty())
             || self.max_image_bytes == 0
             || self.request_timeout.is_zero()
         {
