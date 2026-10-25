@@ -15,10 +15,28 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! For a browser sign-in, let the caller present the URL and open the browser. Reload saved tokens
+//! with [`OAuthToken::load`]; the client refreshes expired tokens and saves updates
+//! back to the same file. Use [`oauth::sign_out`] to remove that saved sign-in.
+//!
+//! ```no_run
+//! use tahweel_drive::{DriveAuth, DriveConfig, DriveRecognizer, OAuthConfig, oauth::{self, SignIn}};
+//!
+//! # async fn example() -> Result<(), tahweel_drive::DriveError> {
+//! let path = oauth::default_token_path()?;
+//! let pending = SignIn::start(OAuthConfig::new(path)).await?;
+//! // Present pending.authorization_url() in your application.
+//! let token = pending.finish().await?;
+//! let recognizer = DriveRecognizer::new(DriveConfig::new(DriveAuth::OAuth(token))).await?;
+//! # Ok(())
+//! # }
+//! ```
 
 mod auth;
 mod config;
 mod error;
+pub mod oauth;
 mod recognizer;
 mod request;
 mod scheduler;
@@ -27,3 +45,5 @@ pub use auth::ServiceAccountKey;
 pub use config::{DriveAuth, DriveConfig};
 pub use error::DriveError;
 pub use recognizer::DriveRecognizer;
+
+pub use oauth::{OAuthConfig, OAuthToken};

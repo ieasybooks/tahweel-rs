@@ -52,8 +52,10 @@ impl DriveRecognizer {
     pub async fn new(config: DriveConfig) -> Result<Self, DriveError> {
         config.validate()?;
         let client = request::client(config.request_timeout)?;
-        let DriveAuth::ServiceAccounts(keys) = &config.auth;
-        let credentials: Vec<_> = keys.iter().cloned().map(Credential::new).collect();
+        let credentials: Vec<_> = match &config.auth {
+            DriveAuth::ServiceAccounts(keys) => keys.iter().cloned().map(Credential::new).collect(),
+            DriveAuth::OAuth(token) => vec![Credential::oauth(token.clone())?],
+        };
         let scheduler = Scheduler::new(credentials.len(), config.concurrency_per_account);
         let recognizer = Self {
             inner: Arc::new(Inner {
@@ -77,7 +79,8 @@ impl DriveRecognizer {
         Ok(recognizer)
     }
 
-    /// The configuration in effect (credentials remain redacted in `Debug`).
+    /// Initial configuration. Refreshed tokens are kept internally and written to their
+    /// saved file; credentials remain redacted in `Debug`.
     pub fn config(&self) -> &DriveConfig {
         &self.inner.config
     }
@@ -100,7 +103,10 @@ impl DriveRecognizer {
             let id = match upload {
                 Ok(Some(id)) => id,
                 Ok(None) => continue,
-                Err(error) if error.is_storage_quota() => {
+                Err(error)
+                    if self.inner.credentials[slot.index].is_service_account()
+                        && error.is_storage_quota() =>
+                {
                     if self.inner.scheduler.disable(slot.index) {
                         tracing::warn!(
                             account = self.inner.credentials[slot.index].name(),

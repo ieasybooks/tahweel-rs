@@ -40,6 +40,7 @@ async-trait = "0.1.92"
 aws-lc-rs = "1.18.2"
 base64 = "0.23.1"
 bytes = "1.12.1"
+dirs = "7.0.0"
 dunce = "1.0.5"
 httpdate = "1.0.3"
 image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }

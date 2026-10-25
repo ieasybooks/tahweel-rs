@@ -9,6 +9,10 @@ use crate::{DriveConfig, DriveError};
 /// Rate limits do not spend ordinary attempts, but a permanently held lane must terminate.
 const MAX_RATE_LIMIT_RETRIES: u32 = 60;
 
+pub(crate) const DEFAULT_MAX_ATTEMPTS: u32 = 5;
+pub(crate) const DEFAULT_RETRY_BASE_DELAY: Duration = Duration::from_secs(1);
+pub(crate) const DEFAULT_RETRY_MAX_DELAY: Duration = Duration::from_secs(60);
+
 pub(crate) fn client(timeout: Duration) -> Result<Client, DriveError> {
     Client::builder()
         .connect_timeout(Duration::from_secs(10).min(timeout))
@@ -73,16 +77,32 @@ fn parse_retry_after(value: &str) -> Option<Duration> {
         .map(|at| at.duration_since(SystemTime::now()).unwrap_or_default())
 }
 
-pub(crate) struct Retry<'a> {
-    config: &'a DriveConfig,
+pub(crate) struct Retry {
+    max_attempts: u32,
+    base_delay: Duration,
+    max_delay: Duration,
     failures: u32,
     rate_limits: u32,
 }
 
-impl<'a> Retry<'a> {
-    pub(crate) fn new(config: &'a DriveConfig) -> Self {
+impl Default for Retry {
+    fn default() -> Self {
         Self {
-            config,
+            max_attempts: DEFAULT_MAX_ATTEMPTS,
+            base_delay: DEFAULT_RETRY_BASE_DELAY,
+            max_delay: DEFAULT_RETRY_MAX_DELAY,
+            failures: 0,
+            rate_limits: 0,
+        }
+    }
+}
+
+impl Retry {
+    pub(crate) fn new(config: &DriveConfig) -> Self {
+        Self {
+            max_attempts: config.max_attempts,
+            base_delay: config.retry_base_delay,
+            max_delay: config.retry_max_delay,
             failures: 0,
             rate_limits: 0,
         }
@@ -100,16 +120,15 @@ impl<'a> Retry<'a> {
             self.rate_limits - 1
         } else {
             self.failures += 1;
-            if self.failures >= self.config.max_attempts {
+            if self.failures >= self.max_attempts {
                 return None;
             }
             self.failures - 1
         };
         let ceiling = self
-            .config
-            .retry_base_delay
+            .base_delay
             .saturating_mul(1 << exponent.min(31))
-            .min(self.config.retry_max_delay);
+            .min(self.max_delay);
         Some(
             error
                 .retry_after()
@@ -120,9 +139,8 @@ impl<'a> Retry<'a> {
 
 pub(crate) async fn token_request(
     request: RequestBuilder,
-    config: &DriveConfig,
+    mut retry: Retry,
 ) -> Result<Bytes, DriveError> {
-    let mut retry = Retry::new(config);
     loop {
         match send(request.try_clone().expect("token form body is cloneable")).await {
             Ok(bytes) => return Ok(bytes),

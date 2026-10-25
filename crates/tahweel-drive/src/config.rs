@@ -1,6 +1,7 @@
 use std::time::Duration;
 
-use crate::{DriveError, ServiceAccountKey};
+use crate::request::{DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_BASE_DELAY, DEFAULT_RETRY_MAX_DELAY};
+use crate::{DriveError, OAuthToken, ServiceAccountKey};
 
 /// Credentials used by the recognizer.
 #[derive(Debug, Clone)]
@@ -8,6 +9,8 @@ use crate::{DriveError, ServiceAccountKey};
 pub enum DriveAuth {
     /// One lane per service account. Load keys with [`ServiceAccountKey::from_file`].
     ServiceAccounts(Vec<ServiceAccountKey>),
+    /// One lane for the user signed in through the browser.
+    OAuth(OAuthToken),
 }
 
 /// Google Drive settings. Start with [`Self::new`] and adjust the public fields.
@@ -45,11 +48,11 @@ impl DriveConfig {
             auth,
             language: "ar".into(),
             concurrency_per_account: 4,
-            max_attempts: 5,
+            max_attempts: DEFAULT_MAX_ATTEMPTS,
             max_image_bytes: 2_000_000,
             request_timeout: Duration::from_secs(120),
-            retry_base_delay: Duration::from_secs(1),
-            retry_max_delay: Duration::from_secs(60),
+            retry_base_delay: DEFAULT_RETRY_BASE_DELAY,
+            retry_max_delay: DEFAULT_RETRY_MAX_DELAY,
             api_base: "https://www.googleapis.com".into(),
             upload_base: "https://www.googleapis.com/upload".into(),
             token_url: "https://oauth2.googleapis.com/token".into(),
@@ -57,8 +60,14 @@ impl DriveConfig {
     }
 
     pub(crate) fn validate(&self) -> Result<(), DriveError> {
-        let DriveAuth::ServiceAccounts(keys) = &self.auth;
-        if keys.is_empty() {
+        let accounts = match &self.auth {
+            DriveAuth::ServiceAccounts(keys) => keys.len(),
+            DriveAuth::OAuth(token) => {
+                token.validate()?;
+                1
+            }
+        };
+        if accounts == 0 {
             return Err(DriveError::Config(
                 "at least one service account is required".into(),
             ));
@@ -68,11 +77,7 @@ impl DriveConfig {
                 "concurrency and attempts must be at least 1".into(),
             ));
         }
-        if keys
-            .len()
-            .checked_mul(self.concurrency_per_account)
-            .is_none()
-        {
+        if accounts.checked_mul(self.concurrency_per_account).is_none() {
             return Err(DriveError::Config("total concurrency is too large".into()));
         }
         if self.language.trim().is_empty()

@@ -1,0 +1,7 @@
+Additional dependency notices
+
+Tahweel's own code is licensed under MIT. Dependency licenses remain unchanged.
+
+option-ext 0.2.0 is used without modifications through dirs and is licensed under Mozilla Public License 2.0. Its source, including LICENSE.txt, is available at https://crates.io/api/v1/crates/option-ext/0.2.0/download. License text: https://www.mozilla.org/MPL/2.0/
+
+webpki-root-certs 1.0.11 provides certificate data for reqwest's platform verifier on supported targets. It is licensed under CDLA-Permissive-2.0. Its source and license are available at https://crates.io/api/v1/crates/webpki-root-certs/1.0.11/download. License text: https://cdla.dev/permissive-2-0/

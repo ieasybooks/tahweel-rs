@@ -54,6 +54,21 @@ pub enum DriveError {
     /// Every service-account lane has run out of Drive storage.
     #[error("no Google Drive account has storage available; use another account or Google sign-in")]
     NoAccounts,
+    /// The saved sign-in cannot be read as a complete Google token.
+    #[error("invalid Google token file; sign in again")]
+    InvalidTokenFile,
+    /// A background token-file write could not finish.
+    #[error("could not finish writing the Google token file")]
+    TokenFileTask,
+    /// The browser did not return before the callback deadline.
+    #[error("Google sign-in timed out")]
+    SignInTimeout,
+    /// The user declined the Google consent screen.
+    #[error("Google sign-in was cancelled")]
+    AccessDenied,
+    /// Google returned an unsuccessful sign-in callback.
+    #[error("Google sign-in failed; try signing in again")]
+    SignInFailed,
     /// The encoded page exceeds the configured upload limit.
     #[error("page image has {bytes} bytes, exceeding the {limit}-byte limit")]
     ImageTooLarge {
@@ -101,6 +116,7 @@ impl DriveError {
                 | Self::InvalidKey(_)
                 | Self::Signing(_)
                 | Self::Config(_)
+                | Self::InvalidTokenFile
         )
     }
 
