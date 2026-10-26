@@ -87,6 +87,48 @@ impl DriveRecognizer {
 
     /// Recognizes one encoded image, returning a typed Drive error.
     pub async fn recognize_page(&self, page: &PageImage) -> Result<Recognition, DriveError> {
+        let mut file = self.upload_page(page).await?;
+        let result = self
+            .inner
+            .export(file.account(), &file.id, "text/plain")
+            .await;
+        file.cleanup().await;
+        let bytes = result?;
+        let text = std::str::from_utf8(&bytes)
+            .map_err(|_| DriveError::InvalidResponse("export was not UTF-8 text"))?;
+        Ok(Recognition::new(clean_text(text)))
+    }
+
+    /// Uploads one image and exports the same Google Doc in each requested MIME type.
+    ///
+    /// This is useful for comparing Drive's native export formats. Each result contains the
+    /// exact response bytes, with no text decoding or cleanup, and corresponds to the MIME
+    /// type at the same index. An export failure is retained while subsequent formats are
+    /// still attempted. The temporary document is deleted after all exports, using the same
+    /// best-effort cleanup as [`Self::recognize_page`].
+    ///
+    /// An empty format list or blank MIME type is rejected before uploading. The outer error
+    /// reports validation or upload failure; individual export errors are in the returned list.
+    pub async fn export_page_formats(
+        &self,
+        page: &PageImage,
+        mime_types: &[&str],
+    ) -> Result<Vec<Result<Bytes, DriveError>>, DriveError> {
+        if mime_types.is_empty() || mime_types.iter().any(|mime| mime.trim().is_empty()) {
+            return Err(DriveError::Config(
+                "at least one nonempty export MIME type is required".into(),
+            ));
+        }
+        let mut file = self.upload_page(page).await?;
+        let mut exports = Vec::with_capacity(mime_types.len());
+        for mime_type in mime_types {
+            exports.push(self.inner.export(file.account(), &file.id, mime_type).await);
+        }
+        file.cleanup().await;
+        Ok(exports)
+    }
+
+    async fn upload_page(&self, page: &PageImage) -> Result<UploadedFile, DriveError> {
         if page.data.len() > self.inner.config.max_image_bytes {
             return Err(DriveError::ImageTooLarge {
                 bytes: page.data.len(),
@@ -118,14 +160,11 @@ impl DriveRecognizer {
                 Err(error) => return Err(error),
             };
             // No await between learning the file ID and installing the cleanup guard.
-            let mut file = UploadedFile {
+            return Ok(UploadedFile {
                 inner: self.inner.clone(),
                 slot: Some(slot),
                 id,
-            };
-            let result = self.inner.export(file.account(), &file.id).await;
-            file.cleanup().await;
-            return result.map(Recognition::new);
+            });
         }
     }
 }
@@ -289,17 +328,15 @@ impl Inner {
         self.client.request(method, url)
     }
 
-    async fn export(&self, account: usize, id: &str) -> Result<String, DriveError> {
+    async fn export(&self, account: usize, id: &str, mime_type: &str) -> Result<Bytes, DriveError> {
         let request = self
             .file_request(Method::GET, id, true)
-            .query(&[("mimeType", "text/plain")]);
+            .query(&[("mimeType", mime_type)]);
         let bytes = self
             .request(account, request, RequestKind::File)
             .await?
             .expect("only uploads can be skipped");
-        let text = std::str::from_utf8(&bytes)
-            .map_err(|_| DriveError::InvalidResponse("export was not UTF-8 text"))?;
-        Ok(clean_text(text))
+        Ok(bytes)
     }
 
     async fn delete(&self, account: usize, id: &str, kind: RequestKind) -> bool {

@@ -48,6 +48,7 @@ Completed pages are saved in `tahweel/checkpoints` under your user cache directo
 - [CLI reference](docs/cli.md): all options, examples and exit codes; also available with `tahweel --help`.
 - [Man page](docs/tahweel.1).
 - [Defaults evaluation](docs/benchmarks/defaults-2026-10-25.md): Arabic page accuracy, image sizing and Drive request measurements.
+- [Compare Drive exports](docs/compare-drive-exports.md): an opt-in experiment with raw TXT, HTML, Markdown and DOCX from the same OCR document.
 - [Core library](https://docs.rs/tahweel) and [Drive recognizer](https://docs.rs/tahweel-drive).
 
 Install shell completions, then follow any printed setup instructions (replace `zsh` with your shell):

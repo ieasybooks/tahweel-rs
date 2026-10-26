@@ -3,6 +3,8 @@
 //! Each page image is uploaded as a Google Doc, which makes Drive run OCR, then exported as plain
 //! text and deleted. Requests are authorized with service-account keys or through a Google
 //! sign-in in the browser (OAuth).
+//! Use [`DriveRecognizer::export_page_formats`] to compare raw native exports from the same
+//! Google Doc before it is deleted, without changing normal plain-text recognition.
 //!
 //! ```no_run
 //! use tahweel_drive::{DriveAuth, DriveConfig, DriveRecognizer, ServiceAccountKey};
