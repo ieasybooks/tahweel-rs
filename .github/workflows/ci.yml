@@ -21,7 +21,7 @@ jobs:
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - name: Install development tools
-        uses: jdx/mise-action@v5.2.3
+        uses: jdx/mise-action@v5.2.4
       - name: Check workspace versions and release-please dependency names
         run: |
           cargo metadata --no-deps --locked --format-version 1 \

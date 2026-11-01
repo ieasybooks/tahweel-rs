@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v5.2.3
+      - uses: jdx/mise-action@v5.2.4
         with:
           install_args: rust cargo-binstall cargo:cargo-about
       - run: cargo about generate --locked --all-features --workspace --fail about.hbs --output-file THIRD-PARTY-LICENSES
