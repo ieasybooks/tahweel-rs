@@ -42,13 +42,39 @@ Outputs go beside the input by default. Use `-o` to mirror a folder, `--output-m
 
 Completed pages are saved in `tahweel/checkpoints` under your user cache directory and resumed after an interrupted or failed run. Ctrl-C stops new pages and waits for running pages to finish deleting their temporary Drive files; a second Ctrl-C exits immediately.
 
+## Library
+
+Add the libraries and a Tokio runtime to an application:
+
+```sh
+cargo add tahweel tahweel-drive
+cargo add tokio --features macros,rt-multi-thread
+```
+
+```rust
+use tahweel::{DocumentStatus, Input, NoProgress, OutputWriter, Tahweel};
+use tahweel_drive::{DriveAuth, DriveConfig, DriveRecognizer, ServiceAccountKey};
+
+let key = ServiceAccountKey::from_file("service-account.json")?;
+let recognizer = DriveRecognizer::new(DriveConfig::new(DriveAuth::ServiceAccounts(vec![key]))).await?;
+let pipeline = Tahweel::builder(recognizer).output(OutputWriter::new().formats([])).build();
+let report = pipeline.run([Input::from("page.png")], &NoProgress).await?;
+for document in &report.documents {
+    if let DocumentStatus::Converted { pages, .. } = &document.status {
+        println!("{}", pages.join("\n"));
+    }
+}
+```
+
+An empty format list keeps the recognized pages in memory instead of writing files. See the [library guide](https://github.com/ieasybooks/tahweel-rs/blob/main/docs/guide.md#using-it-as-a-library) for progress, cancellation, OAuth and custom OCR backends.
+
 ## Documentation
 
 - [User guide](https://github.com/ieasybooks/tahweel-rs/blob/main/docs/guide.md): sign-in, output layouts, resuming, defaults and library examples.
-- [CLI reference](docs/cli.md): all options, examples and exit codes; also available with `tahweel --help`.
-- [Man page](docs/tahweel.1).
 - [Defaults evaluation](docs/benchmarks/defaults-2026-10-25.md): Arabic page accuracy, image sizing and Drive request measurements.
-- [Core library](https://docs.rs/tahweel) and [Drive recognizer](https://docs.rs/tahweel-drive).
+- [CLI reference](docs/cli.md): every option, example and exit code. Also available through `tahweel --help`.
+- [Man page](docs/tahweel.1): included in release archives.
+- API documentation: [`tahweel`](https://docs.rs/tahweel) and [`tahweel-drive`](https://docs.rs/tahweel-drive).
 
 Install shell completions, then follow any printed setup instructions (replace `zsh` with your shell):
 
@@ -60,7 +86,17 @@ Use `@FILE` to load reusable options and input lists from shell-style words. Boo
 
 ## Development
 
-Install the configured tools with `mise install`, then follow [AGENTS.md](AGENTS.md) for checks. Generate the CLI reference with `sh scripts/cli-docs.sh`; CI checks that it is current. Tests use local Drive mocks; PDF tests use `TAHWEEL_TEST_PDFIUM` and skip when it is unset.
+Install the configured tools with mise, then run the checks from the repository root:
+
+```sh
+mise install
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --locked
+cargo deny --locked check
+```
+
+Tests use local Drive mocks; PDF tests use `TAHWEEL_TEST_PDFIUM` and skip when it is unset. After changing CLI declarations, regenerate the CLI reference with `sh scripts/cli-docs.sh`; CI checks that it is current. See [AGENTS.md](AGENTS.md) for project conventions.
 
 ## License
 
